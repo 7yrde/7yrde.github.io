@@ -12,9 +12,11 @@
 ├── index.html        # 메인 랜딩 (7년의 밤)
 ├── auth.js           # 비밀번호 인증 오버레이 (모든 페이지 공통)
 ├── proj/
-│   └── index.html   # 프로젝트 목록 페이지
+│   └── index.html   # 정규 프로젝트 현황판 (PROJ Jira 보드)
+├── musc/
+│   └── index.html   # 음악 트랙 현황 (MUSC Jira 보드)
 └── 7-dashboard/
-    └── index.html   # 2026 신년계획 대시보드
+    └── index.html   # 2026 신년계획 대시보드 (PLAN-14)
 ```
 
 ## 인증

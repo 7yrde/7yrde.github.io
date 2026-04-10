@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Musc | 7년의 밤</title>
+  <script src="/auth.js"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;700&family=JetBrains+Mono:wght@300;400&display=swap');
+    :root {
+      --bg:#0a0c10; --bg2:#111318; --bg3:#181c24;
+      --border:#1e2330; --accent:#4c7cff; --accent2:#7b4fff;
+      --green:#4ade80; --yellow:#fbbf24;
+      --text:#c9d1e0; --dim:#5a6478; --bright:#e8edf5;
+    }
+    *{margin:0;padding:0;box-sizing:border-box}
+    body{background:var(--bg);color:var(--text);font-family:'Noto Sans KR',sans-serif;font-weight:300;min-height:100vh}
+    .stars{position:fixed;inset:0;z-index:0;pointer-events:none}
+    .stars::before{content:'';position:absolute;inset:0;background-image:radial-gradient(1px 1px at 12% 18%,#fff 0%,transparent 100%),radial-gradient(1px 1px at 28% 44%,#fff 0%,transparent 100%),radial-gradient(1px 1px at 55% 63%,#fff 0%,transparent 100%),radial-gradient(1px 1px at 72% 32%,#fff 0%,transparent 100%),radial-gradient(1.5px 1.5px at 88% 77%,rgba(255,255,255,.8) 0%,transparent 100%);opacity:.3;animation:tw 10s ease-in-out infinite alternate}
+    @keyframes tw{0%{opacity:.2}100%{opacity:.4}}
+    .wrap{position:relative;z-index:1;max-width:1080px;margin:0 auto;padding:0 24px}
+    nav{display:flex;align-items:center;gap:16px;padding:28px 0;border-bottom:1px solid var(--border);margin-bottom:48px}
+    .nav-back{font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--dim);text-decoration:none;transition:color .2s}
+    .nav-back:hover{color:var(--accent)}
+    .nav-sep{color:var(--border)}
+    .nav-cur{font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--accent)}
+
+    .page-header{display:flex;align-items:flex-end;justify-content:space-between;flex-wrap:wrap;gap:16px;margin-bottom:12px}
+    .page-label{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--accent);letter-spacing:4px;text-transform:uppercase;margin-bottom:12px}
+    .page-title{font-size:clamp(26px,5vw,38px);font-weight:700;color:var(--bright)}
+    .page-desc{font-size:14px;color:var(--dim);line-height:1.8;margin-bottom:36px}
+
+    /* stats bar */
+    .stats{display:flex;gap:24px;flex-wrap:wrap;margin-bottom:40px;padding:20px 24px;background:var(--bg2);border:1px solid var(--border);border-radius:10px}
+    .stat{display:flex;flex-direction:column;gap:4px}
+    .stat-val{font-family:'JetBrains Mono',monospace;font-size:22px;font-weight:600;color:var(--bright)}
+    .stat-label{font-size:11px;color:var(--dim);letter-spacing:1px}
+
+    /* goal bar */
+    .goal-bar-wrap{flex:1;min-width:200px;display:flex;flex-direction:column;gap:8px;justify-content:center}
+    .goal-bar-label{display:flex;justify-content:space-between;font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--dim)}
+    .goal-bar{height:6px;background:var(--bg3);border-radius:4px;overflow:hidden}
+    .goal-bar-fill{height:100%;border-radius:4px;background:linear-gradient(90deg,var(--accent),var(--accent2))}
+
+    /* tabs */
+    .tabs{display:flex;gap:8px;margin-bottom:28px;flex-wrap:wrap}
+    .tab{font-family:'JetBrains Mono',monospace;font-size:12px;padding:6px 14px;border-radius:6px;border:1px solid var(--border);color:var(--dim);cursor:pointer;background:var(--bg2);transition:all .2s}
+    .tab.active,.tab:hover{border-color:var(--accent);color:var(--accent);background:rgba(76,124,255,.08)}
+
+    /* track list */
+    .section-label{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--accent);letter-spacing:3px;text-transform:uppercase;margin-bottom:16px}
+    .track-list{display:flex;flex-direction:column;gap:4px;margin-bottom:48px}
+    .track-item{display:flex;align-items:center;gap:14px;padding:12px 16px;border-radius:8px;border:1px solid transparent;transition:background .15s,border-color .15s;cursor:default}
+    .track-item:hover{background:var(--bg2);border-color:var(--border)}
+    .track-num{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--dim);width:36px;flex-shrink:0;text-align:right}
+    .track-icon{font-size:14px;opacity:.5;flex-shrink:0}
+    .track-name{font-size:14px;color:var(--text);flex:1;line-height:1.4}
+    .track-status{font-family:'JetBrains Mono',monospace;font-size:10px;padding:2px 8px;border-radius:4px;flex-shrink:0}
+    .track-status.todo{background:rgba(90,100,120,.15);border:1px solid var(--border);color:var(--dim)}
+    .track-status.done{background:rgba(74,222,128,.1);border:1px solid rgba(74,222,128,.2);color:var(--green)}
+
+    /* other tasks */
+    .other-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px;margin-bottom:60px}
+    .other-card{background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:16px;display:flex;flex-direction:column;gap:8px}
+    .other-title{font-size:13px;color:var(--bright);font-weight:400}
+    .other-status{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--dim)}
+
+    footer{border-top:1px solid var(--border);padding:36px 0;text-align:center;margin-top:20px}
+    .footer-text{font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--dim)}
+    @media(max-width:600px){.stats{gap:16px}.stat-val{font-size:18px}}
+  </style>
+</head>
+<body>
+<div class="stars"></div>
+<div class="wrap">
+  <nav>
+    <a href="../" class="nav-back">← 7년의 밤</a>
+    <span class="nav-sep">/</span>
+    <span class="nav-cur">musc</span>
+  </nav>
+
+  <div class="page-label">// music</div>
+  <h1 class="page-title">음악 트랙</h1>
+  <p class="page-desc">MUSC 프로젝트 — 음원 제작 현황입니다. 2026년 목표: 10건 이상 발매.</p>
+
+  <!-- stats -->
+  <div class="stats">
+    <div class="stat">
+      <div class="stat-val">45</div>
+      <div class="stat-label">총 트랙</div>
+    </div>
+    <div class="stat">
+      <div class="stat-val" style="color:var(--green)">0</div>
+      <div class="stat-label">발매 완료</div>
+    </div>
+    <div class="stat">
+      <div class="stat-val" style="color:var(--yellow)">45</div>
+      <div class="stat-label">제작 대기</div>
+    </div>
+    <div class="goal-bar-wrap">
+      <div class="goal-bar-label">
+        <span>2026 발매 목표</span>
+        <span>0 / 10</span>
+      </div>
+      <div class="goal-bar">
+        <div class="goal-bar-fill" style="width:0%"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- tracks M001~M045 -->
+  <div class="section-label">// track list · M001 — M045</div>
+  <div class="track-list">
+    <div class="track-item"><span class="track-num">M001</span><span class="track-icon">🎵</span><span class="track-name">대체 니가 뭘 안다고</span><span class="track-status todo">대기</span></div>
+    <div class="track-item"><span class="track-num">M002</span><span class="track-icon">🎵</span><span class="track-name">오랜 기억</span><span class="track-status todo">대기</span></div>
+    <div class="track-item"><span class="track-num">M003</span><span class="track-icon">🎵</span><span class="track-name">좋던 시간도 지나고 나면</span><span class="track-status todo">대기</span></div>
+    <div class="track-item"><span class="track-num">M004</span><span class="track-icon">🎵</span><span class="track-name">이 밤이 지나고 나면</span><span class="track-status todo">대기</span></div>
+    <div class="track-item"><span class="track-num">M006</span><span class="track-icon">🎵</span><span class="track-name">보싸노바</span><span class="track-status todo">대기</span></div>
+    <div class="track-item"><span class="track-num">M007</span><span class="track-icon">🎵</span><span class="track-name">사라져 먼지처럼</span><span class="track-status todo">대기</span></div>
+    <div class="track-item"><span class="track-num">M008</span><span class="track-icon">🎵</span><span class="track-name">시간여행 interlude</span><span class="track-status todo">대기</span></div>
+    <div class="track-item"><span class="track-num">M009</span><span class="track-icon">🎵</span><span class="track-name">천천히 가면 돼</span><span class="track-status todo">대기</span></div>
+    <div class="track-item"><span class="track-num">M010</span><span class="track-icon">🎵</span><span class="track-name">빨간 장미를 줄게</span><span class="track-status todo">대기</span></div>
+    <div class="track-item"><span class="track-num">M011</span><span class="track-icon">🎵</span><span class="track-name">정글 숲 (언제나 새롭게)</span><span class="track-status todo">대기</span></div>
+    <div class="track-item"><span class="track-num">M012</span><span class="track-icon">🎵</span><span class="track-name">설거지쏭 (푸르지오7년감성)</span><span class="track-status todo">대기</span></div>
+    <div class="track-item"><span class="track-num">M013</span><span class="track-icon">🎵</span><span class="track-name">청소쏭</span><span class="track-status todo">대기</span></div>
+    <div class="track-item"><span class="track-num">M014</span><span class="track-icon">🎵</span><span class="track-name">내게 말해줘 (Stop Watch)</span><span class="track-status todo">대기</span></div>
+    <div class="track-item"><span class="track-num">M015</span><span class="track-icon">🎵</span><span class="track-name">Addicted</span><span class="track-status todo">대기</span></div>
+    <div class="track-item"><span class="track-num">M016</span><span class="track-icon">🎵</span><span class="track-name">To My</span><span class="track-status todo">대기</span></div>
+    <div class="track-item"><span class="track-num">M017</span><span class="track-icon">🎵</span><span class="track-name">I'm fine</span><span class="track-status todo">대기</span></div>
+    <div class="track-item"><span class="track-num">M018</span><span class="track-icon">🎵</span><span class="track-name">Dream</span><span class="track-status todo">대기</span></div>
+    <div class="track-item"><span class="track-num">M019</span><span class="track-icon">🎵</span><span class="track-name">Come Close</span><span class="track-status todo">대기</span></div>
+    <div class="track-item"><span class="track-num">M020</span><span class="track-icon">🎵</span><span class="track-name">Young</span><span class="track-status todo">대기</span></div>
+    <div class="track-item"><span class="track-num">M021</span><span class="track-icon">🎵</span><span class="track-name">TIMECAPSULE rmx (걸어서 정상까지)</span><span class="track-status todo">대기</span></div>
+    <div class="track-item"><span class="track-num">M022</span><span class="track-icon">🎵</span><span class="track-name">수속 (overachieve)</span><span class="track-status todo">대기</span></div>
+    <div class="track-item"><span class="track-num">M023</span><span class="track-icon">🎵</span><span class="track-name">이륙 (Right Way)</span><span class="track-status todo">대기</span></div>
+    <div class="track-item"><span class="track-num">M024</span><span class="track-icon">🎵</span><span class="track-name">자유</span><span class="track-status todo">대기</span></div>
+    <div class="track-item"><span class="track-num">M025</span><span class="track-icon">🎵</span><span class="track-name">지재즈</span><span class="track-status todo">대기</span></div>
+    <div class="track-item"><span class="track-num">M026</span><span class="track-icon">🎵</span><span class="track-name">널 받아주기 싫어</span><span class="track-status todo">대기</span></div>
+    <div class="track-item"><span class="track-num">M027</span><span class="track-icon">🎵</span><span class="track-name">잊고 살어</span><span class="track-status todo">대기</span></div>
+    <div class="track-item"><span class="track-num">M028</span><span class="track-icon">🎵</span><span class="track-name">있어줘</span><span class="track-status todo">대기</span></div>
+    <div class="track-item"><span class="track-num">M029</span><span class="track-icon">🎵</span><span class="track-name">엄밀히</span><span class="track-status todo">대기</span></div>
+    <div class="track-item"><span class="track-num">M030</span><span class="track-icon">🎵</span><span class="track-name">Don't play</span><span class="track-status todo">대기</span></div>
+    <div class="track-item"><span class="track-num">M031</span><span class="track-icon">🎵</span><span class="track-name">고요 (goyo)</span><span class="track-status todo">대기</span></div>
+    <div class="track-item"><span class="track-num">M032</span><span class="track-icon">🎵</span><span class="track-name">길을 나섰지</span><span class="track-status todo">대기</span></div>
+    <div class="track-item"><span class="track-num">M033</span><span class="track-icon">🎵</span><span class="track-name">사랑이 남았나 봐요</span><span class="track-status todo">대기</span></div>
+    <div class="track-item"><span class="track-num">M034</span><span class="track-icon">🎵</span><span class="track-name">지구를 떠나주세요!</span><span class="track-status todo">대기</span></div>
+    <div class="track-item"><span class="track-num">M035</span><span class="track-icon">🎵</span><span class="track-name">FRED</span><span class="track-status todo">대기</span></div>
+    <div class="track-item"><span class="track-num">M036</span><span class="track-icon">🎵</span><span class="track-name">FLOWER</span><span class="track-status todo">대기</span></div>
+    <div class="track-item"><span class="track-num">M037</span><span class="track-icon">🎵</span><span class="track-name">BLST</span><span class="track-status todo">대기</span></div>
+    <div class="track-item"><span class="track-num">M038</span><span class="track-icon">🎵</span><span class="track-name">지금보다 난 더 잘나고 싶어</span><span class="track-status todo">대기</span></div>
+    <div class="track-item"><span class="track-num">M039</span><span class="track-icon">🎵</span><span class="track-name">나는 기적을 바래</span><span class="track-status todo">대기</span></div>
+    <div class="track-item"><span class="track-num">M040</span><span class="track-icon">🎵</span><span class="track-name">나를 찾아줘</span><span class="track-status todo">대기</span></div>
+    <div class="track-item"><span class="track-num">M042</span><span class="track-icon">🎵</span><span class="track-name">청산</span><span class="track-status todo">대기</span></div>
+    <div class="track-item"><span class="track-num">M043</span><span class="track-icon">🎵</span><span class="track-name">실로시빈</span><span class="track-status todo">대기</span></div>
+    <div class="track-item"><span class="track-num">M044</span><span class="track-icon">🎵</span><span class="track-name">노을</span><span class="track-status todo">대기</span></div>
+    <div class="track-item"><span class="track-num">M045</span><span class="track-icon">🎵</span><span class="track-name">더 보여주고 싶지만 3</span><span class="track-status todo">대기</span></div>
+    <div class="track-item"><span class="track-num" style="color:var(--dim);font-style:italic">미정</span><span class="track-icon">🎵</span><span class="track-name" style="color:var(--dim)">11번 트랙</span><span class="track-status todo">대기</span></div>
+    <div class="track-item"><span class="track-num" style="color:var(--dim);font-style:italic">미정</span><span class="track-icon">🎵</span><span class="track-name" style="color:var(--dim)">12번 트랙</span><span class="track-status todo">대기</span></div>
+  </div>
+
+  <!-- 기타 태스크 -->
+  <div class="section-label">// 기타 태스크</div>
+  <div class="other-list">
+    <div class="other-card">
+      <div class="other-title">스토어 개설</div>
+      <div class="other-status">해야 할 일</div>
+    </div>
+    <div class="other-card">
+      <div class="other-title">판매 상품 등록</div>
+      <div class="other-status">해야 할 일</div>
+    </div>
+    <div class="other-card">
+      <div class="other-title">판매 개시 (프로모션)</div>
+      <div class="other-status">해야 할 일</div>
+    </div>
+    <div class="other-card">
+      <div class="other-title">굿즈 제작</div>
+      <div class="other-status">해야 할 일</div>
+    </div>
+    <div class="other-card">
+      <div class="other-title">후보 곡들</div>
+      <div class="other-status">해야 할 일</div>
+    </div>
+  </div>
+
+</div>
+<footer>
+  <div class="wrap">
+    <div class="footer-text">7YR · musc</div>
+  </div>
+</footer>
+</body>
+</html>
