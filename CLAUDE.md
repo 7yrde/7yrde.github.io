@@ -15,6 +15,9 @@
 │   └── index.html   # 정규 프로젝트 현황판 (PROJ Jira 보드)
 ├── musc/
 │   └── index.html   # 음악 트랙 현황 (MUSC Jira 보드)
+├── hlth/
+│   ├── index.html   # InBody 건강 추이 대시보드
+│   └── data.js      # 측정 데이터 (새 측정 시 이 파일에 추가)
 └── 7-dashboard/
     └── index.html   # 2026 신년계획 대시보드 (PLAN-14)
 ```

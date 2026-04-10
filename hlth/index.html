@@ -1,0 +1,499 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Hlth | 7년의 밤</title>
+  <script src="/auth.js"></script>
+  <script src="/hlth/data.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/luxon@3.5.0/build/global/luxon.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-luxon@1.3.1/dist/chartjs-adapter-luxon.umd.min.js"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;700&family=JetBrains+Mono:wght@300;400;600&display=swap');
+
+    :root {
+      --bg:#0a0c10; --bg2:#111318; --bg3:#181c24;
+      --border:#1e2330; --accent:#4c7cff; --accent2:#7b4fff;
+      --green:#4ade80; --yellow:#fbbf24; --red:#f87171; --purple:#a78bfa;
+      --text:#c9d1e0; --dim:#5a6478; --bright:#e8edf5;
+    }
+    *{margin:0;padding:0;box-sizing:border-box}
+    body{background:var(--bg);color:var(--text);font-family:'Noto Sans KR',sans-serif;font-weight:300;min-height:100vh}
+
+    .stars{position:fixed;inset:0;z-index:0;pointer-events:none}
+    .stars::before{content:'';position:absolute;inset:0;
+      background-image:
+        radial-gradient(1px 1px at 10% 20%,#fff 0%,transparent 100%),
+        radial-gradient(1px 1px at 30% 50%,#fff 0%,transparent 100%),
+        radial-gradient(1px 1px at 60% 15%,#fff 0%,transparent 100%),
+        radial-gradient(1px 1px at 80% 70%,#fff 0%,transparent 100%),
+        radial-gradient(1.5px 1.5px at 50% 85%,rgba(255,255,255,.7) 0%,transparent 100%);
+      opacity:.3;animation:tw 10s ease-in-out infinite alternate}
+    @keyframes tw{0%{opacity:.2}100%{opacity:.4}}
+
+    .wrap{position:relative;z-index:1;max-width:1080px;margin:0 auto;padding:0 24px}
+
+    nav{display:flex;align-items:center;gap:16px;padding:28px 0;border-bottom:1px solid var(--border);margin-bottom:40px}
+    .nav-back{font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--dim);text-decoration:none;transition:color .2s}
+    .nav-back:hover{color:var(--accent)}
+    .nav-sep{color:var(--border)}
+    .nav-cur{font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--accent)}
+
+    .page-label{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--accent);letter-spacing:4px;text-transform:uppercase;margin-bottom:12px}
+    .page-header{display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:16px;margin-bottom:36px}
+    .page-title{font-size:clamp(26px,5vw,38px);font-weight:700;color:var(--bright)}
+
+    /* 측정 추가 버튼 */
+    .add-btn{
+      font-family:'JetBrains Mono',monospace;font-size:12px;
+      background:rgba(76,124,255,.12);border:1px solid rgba(76,124,255,.3);
+      color:var(--accent);padding:9px 18px;border-radius:8px;cursor:pointer;
+      transition:background .2s,border-color .2s;white-space:nowrap;
+    }
+    .add-btn:hover{background:rgba(76,124,255,.22);border-color:var(--accent)}
+
+    /* 최신값 카드 */
+    .kpi-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:12px;margin-bottom:32px}
+    .kpi{background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:16px 20px}
+    .kpi-label{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--dim);letter-spacing:2px;text-transform:uppercase;margin-bottom:6px}
+    .kpi-val{font-family:'JetBrains Mono',monospace;font-size:22px;font-weight:600;color:var(--bright);line-height:1}
+    .kpi-unit{font-size:11px;color:var(--dim);margin-left:3px}
+    .kpi-delta{font-family:'JetBrains Mono',monospace;font-size:11px;margin-top:6px}
+    .kpi-delta.up{color:var(--red)}
+    .kpi-delta.down{color:var(--green)}
+    .kpi-delta.neutral{color:var(--dim)}
+    .kpi.goal{border-color:rgba(74,222,128,.2)}
+    .goal-bar{height:4px;background:var(--bg3);border-radius:4px;overflow:hidden;margin-top:8px}
+    .goal-fill{height:100%;border-radius:4px;background:linear-gradient(90deg,var(--accent),var(--green))}
+
+    /* 기간 필터 */
+    .period-row{display:flex;align-items:center;gap:8px;margin-bottom:28px;flex-wrap:wrap}
+    .period-label{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--dim);margin-right:4px}
+    .period-btn{
+      font-family:'JetBrains Mono',monospace;font-size:11px;
+      padding:5px 12px;border-radius:6px;border:1px solid var(--border);
+      color:var(--dim);background:var(--bg2);cursor:pointer;transition:all .15s;
+    }
+    .period-btn.active,.period-btn:hover{border-color:var(--accent);color:var(--accent);background:rgba(76,124,255,.08)}
+
+    /* 차트 섹션 */
+    .charts{display:flex;flex-direction:column;gap:28px;margin-bottom:48px}
+    .chart-card{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:24px}
+    .chart-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px}
+    .chart-title{font-size:15px;font-weight:700;color:var(--bright)}
+    .chart-latest{font-family:'JetBrains Mono',monospace;font-size:13px}
+    .chart-wrap{position:relative;height:180px}
+
+    /* 보조 지표 */
+    .sub-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:16px;margin-bottom:60px}
+    .sub-card{background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:20px}
+    .sub-title{font-size:13px;font-weight:700;color:var(--bright);margin-bottom:16px}
+    .sub-chart-wrap{position:relative;height:120px}
+
+    /* 모달 */
+    .modal-bg{
+      display:none;position:fixed;inset:0;z-index:1000;
+      background:rgba(0,0,0,.7);backdrop-filter:blur(4px);
+      align-items:center;justify-content:center;
+    }
+    .modal-bg.open{display:flex}
+    .modal{
+      background:var(--bg2);border:1px solid var(--border);border-radius:16px;
+      padding:32px;width:100%;max-width:480px;margin:0 16px;
+    }
+    .modal-title{font-size:18px;font-weight:700;color:var(--bright);margin-bottom:24px}
+    .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:20px}
+    .form-field{display:flex;flex-direction:column;gap:6px}
+    .form-field.full{grid-column:1/-1}
+    .form-label{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--dim);letter-spacing:2px;text-transform:uppercase}
+    .form-input{
+      background:var(--bg3);border:1px solid var(--border);color:var(--bright);
+      padding:10px 12px;border-radius:8px;font-family:'JetBrains Mono',monospace;
+      font-size:14px;outline:none;transition:border-color .2s;
+    }
+    .form-input:focus{border-color:var(--accent)}
+    .modal-note{font-size:12px;color:var(--dim);line-height:1.7;margin-bottom:20px;padding:12px 14px;background:var(--bg3);border-radius:8px}
+    .modal-note code{font-family:'JetBrains Mono',monospace;color:var(--accent);font-size:11px}
+    .modal-actions{display:flex;gap:10px;justify-content:flex-end}
+    .btn-cancel{font-family:'JetBrains Mono',monospace;font-size:12px;padding:10px 18px;border-radius:8px;border:1px solid var(--border);color:var(--dim);background:transparent;cursor:pointer;transition:border-color .2s}
+    .btn-cancel:hover{border-color:var(--dim)}
+    .btn-save{font-family:'JetBrains Mono',monospace;font-size:12px;padding:10px 18px;border-radius:8px;border:none;background:var(--accent);color:#fff;cursor:pointer;transition:background .2s}
+    .btn-save:hover{background:#3a6be0}
+
+    footer{border-top:1px solid var(--border);padding:36px 0;text-align:center;margin-top:20px}
+    .footer-text{font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--dim)}
+
+    @media(max-width:600px){
+      .kpi-grid{grid-template-columns:repeat(2,1fr)}
+      .form-grid{grid-template-columns:1fr}
+      .form-field.full{grid-column:1}
+    }
+  </style>
+</head>
+<body>
+<div class="stars"></div>
+
+<div class="wrap">
+  <nav>
+    <a href="../" class="nav-back">← 7년의 밤</a>
+    <span class="nav-sep">/</span>
+    <span class="nav-cur">hlth</span>
+  </nav>
+
+  <div class="page-header">
+    <div>
+      <div class="page-label">// health · inbody</div>
+      <h1 class="page-title">건강 추이</h1>
+    </div>
+    <button class="add-btn" onclick="openModal()">+ 측정 추가</button>
+  </div>
+
+  <!-- KPI 카드 -->
+  <div class="kpi-grid" id="kpiGrid"></div>
+
+  <!-- 기간 필터 -->
+  <div class="period-row">
+    <span class="period-label">기간</span>
+    <button class="period-btn active" data-period="all">전체</button>
+    <button class="period-btn" data-period="1y">최근 1년</button>
+    <button class="period-btn" data-period="6m">최근 6개월</button>
+    <button class="period-btn" data-period="3m">최근 3개월</button>
+  </div>
+
+  <!-- 주요 차트 -->
+  <div class="charts">
+    <div class="chart-card">
+      <div class="chart-header">
+        <span class="chart-title">체중</span>
+        <span class="chart-latest" id="latestWeight" style="color:var(--accent)"></span>
+      </div>
+      <div class="chart-wrap"><canvas id="chartWeight"></canvas></div>
+    </div>
+    <div class="chart-card">
+      <div class="chart-header">
+        <span class="chart-title">근육량</span>
+        <span class="chart-latest" id="latestMuscle" style="color:var(--green)"></span>
+      </div>
+      <div class="chart-wrap"><canvas id="chartMuscle"></canvas></div>
+    </div>
+    <div class="chart-card">
+      <div class="chart-header">
+        <span class="chart-title">체지방률</span>
+        <span class="chart-latest" id="latestFatPct" style="color:var(--yellow)"></span>
+      </div>
+      <div class="chart-wrap"><canvas id="chartFatPct"></canvas></div>
+    </div>
+  </div>
+
+  <!-- 보조 지표 -->
+  <div class="sub-grid">
+    <div class="sub-card">
+      <div class="sub-title">체지방량 (kg)</div>
+      <div class="sub-chart-wrap"><canvas id="chartFatKg"></canvas></div>
+    </div>
+    <div class="sub-card">
+      <div class="sub-title">BMI (kg/m²)</div>
+      <div class="sub-chart-wrap"><canvas id="chartBmi"></canvas></div>
+    </div>
+    <div class="sub-card">
+      <div class="sub-title">내장지방레벨</div>
+      <div class="sub-chart-wrap"><canvas id="chartVisceral"></canvas></div>
+    </div>
+  </div>
+</div>
+
+<!-- 측정 추가 모달 -->
+<div class="modal-bg" id="modalBg">
+  <div class="modal">
+    <div class="modal-title">측정값 추가</div>
+    <div class="form-grid">
+      <div class="form-field full">
+        <label class="form-label">날짜</label>
+        <input class="form-input" type="date" id="fDate" />
+      </div>
+      <div class="form-field">
+        <label class="form-label">체중 (kg)</label>
+        <input class="form-input" type="number" step="0.1" id="fWeight" placeholder="78.3" />
+      </div>
+      <div class="form-field">
+        <label class="form-label">근육량 (kg)</label>
+        <input class="form-input" type="number" step="0.1" id="fMuscle" placeholder="35.2" />
+      </div>
+      <div class="form-field">
+        <label class="form-label">체지방량 (kg)</label>
+        <input class="form-input" type="number" step="0.1" id="fFatKg" placeholder="16.1" />
+      </div>
+      <div class="form-field">
+        <label class="form-label">체지방률 (%)</label>
+        <input class="form-input" type="number" step="0.1" id="fFatPct" placeholder="20.5" />
+      </div>
+      <div class="form-field">
+        <label class="form-label">BMI</label>
+        <input class="form-input" type="number" step="0.1" id="fBmi" placeholder="24.4" />
+      </div>
+      <div class="form-field">
+        <label class="form-label">내장지방레벨</label>
+        <input class="form-input" type="number" step="1" id="fVisceral" placeholder="6" />
+      </div>
+    </div>
+    <div class="modal-note">
+      추가한 데이터는 이 브라우저에 임시 저장됩니다.<br />
+      영구 반영하려면 <code>hlth/data.js</code>에 직접 추가하세요.
+    </div>
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeModal()">취소</button>
+      <button class="btn-save" onclick="saveEntry()">저장</button>
+    </div>
+  </div>
+</div>
+
+<footer>
+  <div class="wrap">
+    <div class="footer-text">7YR · hlth · InBody 측정 데이터</div>
+  </div>
+</footer>
+
+<script>
+// ── 데이터 병합 (data.js + localStorage) ──────────────────────
+const LS_KEY = '7yr_hlth_extra';
+function getAllData() {
+  const base = [...INBODY_DATA];
+  try {
+    const extra = JSON.parse(localStorage.getItem(LS_KEY) || '[]');
+    extra.forEach(e => base.push(e));
+  } catch(_) {}
+  return base.sort((a, b) => a.date.localeCompare(b.date));
+}
+
+// ── 기간 필터 ─────────────────────────────────────────────────
+let currentPeriod = 'all';
+function filterByPeriod(data, period) {
+  if (period === 'all') return data;
+  const now = new Date();
+  const cutoff = new Date(now);
+  if (period === '1y')      cutoff.setFullYear(now.getFullYear() - 1);
+  else if (period === '6m') cutoff.setMonth(now.getMonth() - 6);
+  else if (period === '3m') cutoff.setMonth(now.getMonth() - 3);
+  return data.filter(d => new Date(d.date) >= cutoff);
+}
+
+// ── 차트 공통 옵션 ─────────────────────────────────────────────
+const CHART_DEFAULTS = {
+  responsive: true,
+  maintainAspectRatio: false,
+  animation: { duration: 400 },
+  plugins: {
+    legend: { display: false },
+    tooltip: {
+      backgroundColor: '#181c24',
+      borderColor: '#1e2330',
+      borderWidth: 1,
+      titleColor: '#c9d1e0',
+      bodyColor: '#e8edf5',
+      titleFont: { family: 'JetBrains Mono', size: 11 },
+      bodyFont: { family: 'JetBrains Mono', size: 13 },
+    }
+  },
+  scales: {
+    x: {
+      type: 'time',
+      time: { unit: 'month', displayFormats: { month: 'yy.MM', day: 'MM.dd' } },
+      adapters: { date: { locale: 'ko' } },
+      grid: { color: '#1e2330' },
+      ticks: { color: '#5a6478', font: { family: 'JetBrains Mono', size: 10 }, maxRotation: 0 }
+    },
+    y: {
+      grid: { color: '#1e2330' },
+      ticks: { color: '#5a6478', font: { family: 'JetBrains Mono', size: 10 } }
+    }
+  }
+};
+
+function makeTimeOpts(color, minPad = 0.5, maxPad = 0.5) {
+  return JSON.parse(JSON.stringify({
+    ...CHART_DEFAULTS,
+    scales: {
+      ...CHART_DEFAULTS.scales,
+      y: {
+        ...CHART_DEFAULTS.scales.y,
+        ticks: { ...CHART_DEFAULTS.scales.y.ticks }
+      }
+    }
+  }));
+}
+
+function buildDataset(data, key, color) {
+  return {
+    data: data.map(d => ({ x: d.date, y: d[key] })),
+    borderColor: color,
+    backgroundColor: color + '22',
+    borderWidth: 2,
+    pointRadius: 4,
+    pointHoverRadius: 6,
+    pointBackgroundColor: color,
+    tension: 0.3,
+    fill: true,
+  };
+}
+
+// ── 차트 인스턴스 ──────────────────────────────────────────────
+let charts = {};
+
+function makeChart(id, key, color, unit) {
+  const ctx = document.getElementById(id).getContext('2d');
+  const opts = makeTimeOpts(color);
+  opts.plugins.tooltip.callbacks = {
+    title: items => items[0].raw.x.replace('T', ' ').slice(0, 10),
+    label: item => ` ${item.raw.y} ${unit}`,
+  };
+  const data = getAllData();
+  charts[id] = new Chart(ctx, {
+    type: 'line',
+    data: { datasets: [buildDataset(filterByPeriod(data, currentPeriod), key, color)] },
+    options: opts,
+  });
+}
+
+function updateCharts() {
+  const data = getAllData();
+  const filtered = filterByPeriod(data, currentPeriod);
+  const keys = {
+    chartWeight:   { key: 'weight',   color: '#4c7cff' },
+    chartMuscle:   { key: 'muscle',   color: '#4ade80' },
+    chartFatPct:   { key: 'fatPct',   color: '#fbbf24' },
+    chartFatKg:    { key: 'fatKg',    color: '#f87171' },
+    chartBmi:      { key: 'bmi',      color: '#a78bfa' },
+    chartVisceral: { key: 'visceral', color: '#fb923c' },
+  };
+  Object.entries(keys).forEach(([id, { key, color }]) => {
+    if (!charts[id]) return;
+    charts[id].data.datasets[0].data = filtered.map(d => ({ x: d.date, y: d[key] }));
+    charts[id].update();
+  });
+
+  // time unit 자동 조정
+  const span = filtered.length > 1
+    ? (new Date(filtered[filtered.length-1].date) - new Date(filtered[0].date)) / 86400000
+    : 30;
+  const unit = span <= 45 ? 'day' : 'month';
+  Object.values(charts).forEach(c => {
+    c.options.scales.x.time.unit = unit;
+    c.update();
+  });
+}
+
+// ── KPI 카드 ──────────────────────────────────────────────────
+function renderKpi() {
+  const data = getAllData();
+  const latest = data[data.length - 1];
+  const prev   = data[data.length - 2];
+  const GOAL_MUSCLE = 38;
+
+  function delta(cur, pre, lowerBetter = false) {
+    const d = (cur - pre).toFixed(1);
+    const sign = d > 0 ? '+' : '';
+    const cls = (lowerBetter ? d > 0 : d < 0) ? 'down' : d == 0 ? 'neutral' : 'up';
+    return `<span class="kpi-delta ${cls}">${sign}${d}</span>`;
+  }
+
+  const musclePct = Math.min(100, Math.round((latest.muscle / GOAL_MUSCLE) * 100));
+
+  document.getElementById('kpiGrid').innerHTML = `
+    <div class="kpi">
+      <div class="kpi-label">체중</div>
+      <div><span class="kpi-val">${latest.weight}</span><span class="kpi-unit">kg</span></div>
+      ${delta(latest.weight, prev.weight, true)}
+    </div>
+    <div class="kpi goal">
+      <div class="kpi-label">근육량 · 목표 38kg</div>
+      <div><span class="kpi-val" style="color:var(--green)">${latest.muscle}</span><span class="kpi-unit">kg</span></div>
+      ${delta(latest.muscle, prev.muscle)}
+      <div class="goal-bar"><div class="goal-fill" style="width:${musclePct}%"></div></div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">체지방률</div>
+      <div><span class="kpi-val" style="color:var(--yellow)">${latest.fatPct}</span><span class="kpi-unit">%</span></div>
+      ${delta(latest.fatPct, prev.fatPct, true)}
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">체지방량</div>
+      <div><span class="kpi-val">${latest.fatKg}</span><span class="kpi-unit">kg</span></div>
+      ${delta(latest.fatKg, prev.fatKg, true)}
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">BMI</div>
+      <div><span class="kpi-val" style="color:var(--purple)">${latest.bmi}</span><span class="kpi-unit">kg/m²</span></div>
+      ${delta(latest.bmi, prev.bmi, true)}
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">내장지방</div>
+      <div><span class="kpi-val">${latest.visceral}</span><span class="kpi-unit">Lv</span></div>
+      ${delta(latest.visceral, prev.visceral, true)}
+    </div>
+  `;
+
+  // 최신값 라벨
+  document.getElementById('latestWeight').textContent  = `${latest.weight} kg`;
+  document.getElementById('latestMuscle').textContent  = `${latest.muscle} kg`;
+  document.getElementById('latestFatPct').textContent  = `${latest.fatPct} %`;
+}
+
+// ── 모달 ──────────────────────────────────────────────────────
+function openModal() {
+  document.getElementById('fDate').value = new Date().toISOString().slice(0,10);
+  document.getElementById('modalBg').classList.add('open');
+}
+function closeModal() {
+  document.getElementById('modalBg').classList.remove('open');
+}
+function saveEntry() {
+  const entry = {
+    date:     document.getElementById('fDate').value,
+    weight:   parseFloat(document.getElementById('fWeight').value),
+    muscle:   parseFloat(document.getElementById('fMuscle').value),
+    fatKg:    parseFloat(document.getElementById('fFatKg').value),
+    fatPct:   parseFloat(document.getElementById('fFatPct').value),
+    bmi:      parseFloat(document.getElementById('fBmi').value),
+    visceral: parseInt(document.getElementById('fVisceral').value),
+  };
+  if (!entry.date || isNaN(entry.weight)) {
+    alert('날짜와 체중은 필수입니다.');
+    return;
+  }
+  const extra = JSON.parse(localStorage.getItem(LS_KEY) || '[]');
+  extra.push(entry);
+  localStorage.setItem(LS_KEY, JSON.stringify(extra));
+  closeModal();
+  renderKpi();
+  updateCharts();
+}
+
+// 모달 외부 클릭 닫기
+document.getElementById('modalBg').addEventListener('click', function(e) {
+  if (e.target === this) closeModal();
+});
+
+// ── 기간 버튼 ─────────────────────────────────────────────────
+document.querySelectorAll('.period-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.period-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    currentPeriod = btn.dataset.period;
+    updateCharts();
+  });
+});
+
+// ── 초기화 ────────────────────────────────────────────────────
+window.addEventListener('DOMContentLoaded', () => {
+  renderKpi();
+  makeChart('chartWeight',   'weight',   '#4c7cff', 'kg');
+  makeChart('chartMuscle',   'muscle',   '#4ade80', 'kg');
+  makeChart('chartFatPct',   'fatPct',   '#fbbf24', '%');
+  makeChart('chartFatKg',    'fatKg',    '#f87171', 'kg');
+  makeChart('chartBmi',      'bmi',      '#a78bfa', 'kg/m²');
+  makeChart('chartVisceral', 'visceral', '#fb923c', 'Lv');
+});
+</script>
+</body>
+</html>
