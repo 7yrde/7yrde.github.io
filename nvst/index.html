@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>돈 | 7년의 밤</title>
+  <script src="/auth.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;700&family=JetBrains+Mono:wght@300;400;600&display=swap');
+
+    :root {
+      --bg:#0a0c10; --bg2:#111318; --bg3:#181c24;
+      --border:#1e2330; --accent:#4c7cff; --accent2:#7b4fff;
+      --green:#4ade80; --red:#f87171; --yellow:#fbbf24; --purple:#a78bfa; --orange:#fb923c;
+      --text:#c9d1e0; --dim:#5a6478; --bright:#e8edf5;
+    }
+    *{margin:0;padding:0;box-sizing:border-box}
+    body{background:var(--bg);color:var(--text);font-family:'Noto Sans KR',sans-serif;font-weight:300;min-height:100vh}
+
+    .stars{position:fixed;inset:0;z-index:0;pointer-events:none}
+    .stars::before{content:'';position:absolute;inset:0;
+      background-image:
+        radial-gradient(1px 1px at 15% 25%,#fff 0%,transparent 100%),
+        radial-gradient(1px 1px at 40% 60%,#fff 0%,transparent 100%),
+        radial-gradient(1px 1px at 65% 15%,#fff 0%,transparent 100%),
+        radial-gradient(1px 1px at 85% 70%,#fff 0%,transparent 100%),
+        radial-gradient(1.5px 1.5px at 55% 88%,rgba(255,255,255,.6) 0%,transparent 100%);
+      opacity:.3;animation:tw 10s ease-in-out infinite alternate}
+    @keyframes tw{0%{opacity:.2}100%{opacity:.4}}
+
+    .wrap{position:relative;z-index:1;max-width:1080px;margin:0 auto;padding:0 24px}
+
+    nav{display:flex;align-items:center;gap:16px;padding:28px 0;border-bottom:1px solid var(--border);margin-bottom:40px}
+    .nav-back{font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--dim);text-decoration:none;transition:color .2s}
+    .nav-back:hover{color:var(--accent)}
+    .nav-sep{color:var(--border)}
+    .nav-cur{font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--accent)}
+
+    .page-label{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--accent);letter-spacing:4px;text-transform:uppercase;margin-bottom:12px}
+    .page-title{font-size:clamp(26px,5vw,38px);font-weight:700;color:var(--bright);margin-bottom:36px}
+
+    /* 순자산 히어로 */
+    .hero{background:var(--bg2);border:1px solid var(--border);border-radius:16px;padding:32px;margin-bottom:28px;display:flex;flex-wrap:wrap;gap:32px;align-items:center}
+    .hero-main{flex:1;min-width:200px}
+    .hero-label{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--dim);letter-spacing:3px;text-transform:uppercase;margin-bottom:8px}
+    .hero-val{font-family:'JetBrains Mono',monospace;font-size:clamp(24px,4vw,36px);font-weight:600;color:var(--bright);line-height:1}
+    .hero-delta{font-size:13px;color:var(--green);margin-top:8px}
+
+    .hero-goal{flex:1;min-width:220px}
+    .goal-label{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--dim);letter-spacing:2px;margin-bottom:8px}
+    .goal-val{font-size:13px;color:var(--text);margin-bottom:8px}
+    .goal-val strong{color:var(--green)}
+    .progress-bar{height:6px;background:var(--bg3);border-radius:4px;overflow:hidden}
+    .progress-fill{height:100%;border-radius:4px;background:linear-gradient(90deg,var(--accent),var(--green))}
+    .goal-sub{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--dim);margin-top:6px}
+
+    /* 자산 배분 */
+    .alloc-section{display:grid;grid-template-columns:240px 1fr;gap:24px;margin-bottom:28px;align-items:center}
+    .chart-wrap{position:relative;width:200px;height:200px;margin:0 auto}
+    .chart-center{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;pointer-events:none}
+    .chart-center-val{font-family:'JetBrains Mono',monospace;font-size:16px;font-weight:600;color:var(--bright)}
+    .chart-center-label{font-size:11px;color:var(--dim)}
+
+    .legend{display:flex;flex-direction:column;gap:10px}
+    .legend-item{display:flex;align-items:center;gap:10px}
+    .legend-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+    .legend-name{font-size:13px;color:var(--text);flex:1}
+    .legend-amt{font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--bright);text-align:right}
+    .legend-pct{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--dim);width:36px;text-align:right}
+
+    /* 카테고리 아코디언 */
+    .categories{display:flex;flex-direction:column;gap:8px;margin-bottom:60px}
+    .cat-card{background:var(--bg2);border:1px solid var(--border);border-radius:12px;overflow:hidden}
+    .cat-header{display:flex;align-items:center;gap:14px;padding:18px 20px;cursor:pointer;user-select:none;transition:background .15s}
+    .cat-header:hover{background:var(--bg3)}
+    .cat-icon{font-size:18px;flex-shrink:0}
+    .cat-name{font-size:14px;font-weight:700;color:var(--bright);flex:1}
+    .cat-amount{font-family:'JetBrains Mono',monospace;font-size:14px;font-weight:600}
+    .cat-amount.positive{color:var(--bright)}
+    .cat-amount.negative{color:var(--red)}
+    .cat-delta{font-family:'JetBrains Mono',monospace;font-size:11px;margin-left:8px}
+    .cat-delta.up{color:var(--green)}
+    .cat-delta.down{color:var(--red)}
+    .cat-chevron{font-size:12px;color:var(--dim);transition:transform .25s;margin-left:8px}
+    .cat-card.open .cat-chevron{transform:rotate(180deg)}
+
+    .cat-body{display:none;border-top:1px solid var(--border)}
+    .cat-card.open .cat-body{display:block}
+
+    .sub-row{display:flex;align-items:flex-start;gap:12px;padding:14px 20px;border-bottom:1px solid var(--border)}
+    .sub-row:last-child{border-bottom:none}
+    .sub-row-icon{font-size:14px;flex-shrink:0;margin-top:2px;opacity:.7}
+    .sub-row-info{flex:1}
+    .sub-row-name{font-size:13px;color:var(--bright)}
+    .sub-row-note{font-size:11px;color:var(--dim);margin-top:3px}
+    .sub-row-right{text-align:right;flex-shrink:0}
+    .sub-row-amt{font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:600;color:var(--bright)}
+    .sub-row-amt.neg{color:var(--red)}
+    .sub-row-sub{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--dim);margin-top:3px}
+    .sub-row-sub.up{color:var(--green)}
+    .sub-row-sub.down{color:var(--red)}
+
+    .cat-summary{padding:14px 20px;background:var(--bg3);font-size:12px;color:var(--dim);line-height:1.7}
+
+    /* 브로커 서브 아코디언 */
+    .broker-section{border-top:1px solid var(--border)}
+    .broker-header{display:flex;align-items:center;gap:10px;padding:12px 20px;cursor:pointer;user-select:none;transition:background .15s}
+    .broker-header:hover{background:rgba(255,255,255,.03)}
+    .broker-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+    .broker-name{font-size:13px;font-weight:700;color:var(--bright);flex:1}
+    .broker-count{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--dim);margin-right:8px}
+    .broker-amt{font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:600;color:var(--bright)}
+    .broker-chevron{font-size:10px;color:var(--dim);transition:transform .25s;margin-left:10px}
+    .broker-section.open .broker-chevron{transform:rotate(180deg)}
+    .broker-body{display:none;border-top:1px solid rgba(255,255,255,.06)}
+    .broker-section.open .broker-body{display:block}
+    .holding-row{display:flex;align-items:center;gap:10px;padding:8px 20px 8px 42px;border-bottom:1px solid rgba(255,255,255,.04)}
+    .holding-row:last-child{border-bottom:none}
+    .holding-name{font-size:12px;color:var(--text);flex:1}
+    .holding-amt{font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--bright)}
+    .holding-pct{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--dim);width:36px;text-align:right}
+
+    footer{border-top:1px solid var(--border);padding:36px 0;text-align:center;margin-top:20px}
+    .footer-text{font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--dim)}
+
+    @media(max-width:640px){
+      .alloc-section{grid-template-columns:1fr}
+      .chart-wrap{width:160px;height:160px}
+      .hero{flex-direction:column;gap:20px}
+    }
+  </style>
+</head>
+<body>
+<div class="stars"></div>
+<div class="wrap">
+  <nav>
+    <a href="../" class="nav-back">← 7년의 밤</a>
+    <span class="nav-sep">/</span>
+    <span class="nav-cur">nvst</span>
+  </nav>
+
+  <div class="page-label">// money · assets</div>
+  <h1 class="page-title">자산 현황</h1>
+
+  <!-- 순자산 히어로 -->
+  <div class="hero">
+    <div class="hero-main">
+      <div class="hero-label">순자산</div>
+      <div class="hero-val" id="netWorthVal"></div>
+      <div class="hero-delta" id="netWorthDelta"></div>
+    </div>
+    <div class="hero-goal">
+      <div class="goal-label">2026 목표 · 투자여윳돈 4억</div>
+      <div class="goal-val" id="goalVal"></div>
+      <div class="progress-bar"><div class="progress-fill" id="goalBar"></div></div>
+      <div class="goal-sub" id="goalSub"></div>
+    </div>
+  </div>
+
+  <!-- 자산 배분 도넛 -->
+  <div class="alloc-section">
+    <div>
+      <div class="chart-wrap">
+        <canvas id="allocChart"></canvas>
+        <div class="chart-center">
+          <div class="chart-center-val" id="totalAssetVal"></div>
+          <div class="chart-center-label">총 자산</div>
+        </div>
+      </div>
+    </div>
+    <div class="legend" id="legend"></div>
+  </div>
+
+  <!-- 카테고리 아코디언 -->
+  <div class="categories" id="categories"></div>
+</div>
+
+<footer>
+  <div class="wrap">
+    <div class="footer-text">7YR · nvst · 자산 현황</div>
+  </div>
+</footer>
+
+<script>
+// ── 데이터 ────────────────────────────────────────────────────
+const DATA = {
+  updatedAt: "2026-04-10",
+  netWorth:  1016068474,
+  netDelta:  3356829,
+
+  categories: [
+    {
+      id: "cash",
+      icon: "🏦",
+      name: "계좌·현금",
+      amount: 4699681,
+      delta: 140000,
+      color: "#4c7cff",
+      items: [
+        // 이따 추가 이미지 참고해서 채울 예정
+        { name: "계좌·현금 합계", note: "상세 내역 추가 예정", amount: 4699681 }
+      ],
+      note: "상세 계좌 내역은 추가 이미지 수신 후 업데이트 예정입니다."
+    },
+    {
+      id: "deposit",
+      icon: "💳",
+      name: "예적금",
+      amount: 12827470,
+      delta: null,
+      color: "#a78bfa",
+      items: [
+        { name: "예적금 합계", note: "상세 내역 추가 예정", amount: 12827470 }
+      ],
+      note: "상세 계좌 내역은 추가 이미지 수신 후 업데이트 예정입니다."
+    },
+    {
+      id: "invest",
+      icon: "📈",
+      name: "투자",
+      amount: 357416072,
+      delta: 3130000,
+      color: "#4ade80",
+      items: [],
+      brokers: [
+        {
+          id: "namu",
+          name: "나무증권",
+          color: "#4ade80",
+          amount: 186800000,
+          holdings: [
+            { name: "Apple (AAPL)",                  amount: 31400000 },
+            { name: "Alphabet C (GOOG)",              amount: 28500000 },
+            { name: "Tesla (TSLA)",                   amount: 27100000 },
+            { name: "Alphabet A (GOOGL)",             amount: 19800000 },
+            { name: "Netflix (NFLX)",                 amount: 13300000 },
+            { name: "Berkshire Hathaway B (BRK.B)",   amount: 11400000 },
+            { name: "Amazon (AMZN)",                  amount: 11300000 },
+            { name: "NVIDIA (NVDA)",                  amount: 10000000 },
+            { name: "SPDR S&P 500 ETF (SPY)",         amount:  9100000 },
+            { name: "Microsoft (MSFT)",               amount:  8800000 },
+            { name: "TSMC ADR (TSM)",                 amount:  7200000 },
+            { name: "iShares Core MSCI EM (IEMG)",    amount:  6100000 },
+            { name: "Invesco QQQ (QQQ)",              amount:  2700000 }
+          ]
+        },
+        {
+          id: "kb",
+          name: "KB증권",
+          color: "#fbbf24",
+          amount: 150800000,
+          holdings: [
+            { name: "iShares 1-3Y Treasury (SHY)",    amount: 15600000 },
+            { name: "JPMorgan Income ETF (JEPI)",      amount: 11800000 },
+            { name: "Berkshire Hathaway B (BRK.B)",   amount: 12100000 },
+            { name: "SPDR S&P 500 ETF (SPY)",         amount: 11100000 },
+            { name: "Schwab US Dividend (SCHD)",      amount:  9400000 },
+            { name: "TIGER 미국S&P500",               amount:  8700000 },
+            { name: "Vanguard Dividend (VIG)",        amount:  8300000 },
+            { name: "RISE 버크셔포트폴리오",           amount:  7800000 },
+            { name: "TIGER 미국배당다우존스",          amount:  7800000 },
+            { name: "TIGER 미국나스닥100",             amount:  7400000 },
+            { name: "기타 26종목",                    amount: 50800000 }
+          ]
+        },
+        {
+          id: "mirae",
+          name: "미래에셋",
+          color: "#fb923c",
+          amount: 19600000,
+          holdings: [
+            { name: "NAVER (035420)", amount: 19600000 }
+          ]
+        }
+      ],
+      note: "투자 + 연금 합산 금액이 2026 여윳돈 목표(4억)에 반영됩니다."
+    },
+    {
+      id: "pension",
+      icon: "🥚",
+      name: "연금",
+      amount: 10636436,
+      delta: 79889,
+      color: "#fb923c",
+      items: [
+        { name: "연금 합계", note: "상세 내역 추가 예정", amount: 10636436 }
+      ],
+      note: "2026 목표 여윳돈 집계에 포함됩니다."
+    },
+    {
+      id: "realestate",
+      icon: "🏠",
+      name: "부동산",
+      amount: 850000000,
+      delta: null,
+      color: "#fbbf24",
+      items: [
+        { name: "면목한신", note: "아파트 · 자가", amount: 550000000, sub: "▲ 4,000만원 (구매가 5억 1,000만원)" },
+        { name: "청솔마을 (주공9단지)", note: "아파트 · 전세", amount: 300000000, sub: null }
+      ],
+      note: "총 부동산 시세 8억 5,000만원 · 구매가 8억 1,000만원 · 평가손익 +4,000만원"
+    },
+    {
+      id: "loan",
+      icon: "📋",
+      name: "대출",
+      amount: -216556170,
+      delta: null,
+      color: "#f87171",
+      isDebt: true,
+      items: [
+        { name: "학자금대출 (2022 2학기 등록금)", note: "일반상환 · 26일 상환", amount: -7007000 },
+        { name: "학자금대출 (2023 2학기 등록금)", note: "일반상환 · 23일 상환", amount: -6629900 },
+        { name: "학자금대출 (2022 2학기 생활비)", note: "일반상환 · 26일 상환", amount: -1500000 },
+        { name: "학자금대출 (2023 2학기 생활비)", note: "일반상환 · 23일 상환", amount: -1419270 },
+        { name: "주택자금대출 (신한 전세대출)", note: "전세 · 25일 상환", amount: -200000000 },
+        { name: "국민은행 마이너스 통장", note: "25일 상환", amount: 0 }
+      ],
+      note: "이번 달 상환금 633,044원 · 연 평균 절감 가능 이자 24.5만원"
+    },
+    {
+      id: "card",
+      icon: "💳",
+      name: "카드이용대금",
+      amount: -2955130,
+      delta: null,
+      color: "#94a3b8",
+      isDebt: true,
+      items: [
+        { name: "카드이용대금 합계", note: "상세 내역 추가 예정", amount: -2955130 }
+      ],
+      note: "상세 카드 내역은 추가 이미지 수신 후 업데이트 예정입니다."
+    }
+  ]
+};
+
+// ── 숫자 포맷 ─────────────────────────────────────────────────
+function fmt(n, sign = false) {
+  const abs = Math.abs(n);
+  let s;
+  if (abs >= 1e8)      s = (abs / 1e8).toFixed(1).replace(/\.0$/, '') + '억';
+  else if (abs >= 1e4) s = Math.round(abs / 1e4) + '만';
+  else                 s = abs.toLocaleString();
+  // 억+만 조합
+  if (abs >= 1e8 && abs % 1e8 >= 1e4) {
+    const uk = Math.floor(abs / 1e8);
+    const man = Math.round((abs % 1e8) / 1e4);
+    s = uk + '억 ' + man + '만';
+  }
+  return (sign && n > 0 ? '+' : n < 0 ? '-' : '') + s;
+}
+function fmtFull(n) {
+  return (n < 0 ? '-' : '') + Math.abs(n).toLocaleString() + '원';
+}
+
+// ── 순자산 히어로 ─────────────────────────────────────────────
+document.getElementById('netWorthVal').textContent = fmt(DATA.netWorth) + '원';
+document.getElementById('netWorthDelta').textContent = `지난 방문 대비 +${fmt(DATA.netDelta)}원`;
+
+// 2026 목표: 투자 + 연금 = 여윳돈
+const investCat   = DATA.categories.find(c => c.id === 'invest');
+const pensionCat  = DATA.categories.find(c => c.id === 'pension');
+const goalTarget  = 400000000;
+const goalCurrent = investCat.amount + pensionCat.amount; // 357,416,072 + 10,636,436
+const goalPct     = Math.min(100, Math.round((goalCurrent / goalTarget) * 100));
+document.getElementById('goalVal').innerHTML =
+  `현재 <strong>${fmt(goalCurrent)}원</strong> / 목표 4억원`;
+document.getElementById('goalBar').style.width = goalPct + '%';
+document.getElementById('goalSub').textContent =
+  `${goalPct}% 달성 · ${fmt(goalTarget - goalCurrent)}원 남음`;
+
+// ── 도넛 차트 ─────────────────────────────────────────────────
+const assets = DATA.categories.filter(c => !c.isDebt);
+const totalAsset = assets.reduce((s, c) => s + c.amount, 0);
+document.getElementById('totalAssetVal').textContent = fmt(totalAsset);
+
+new Chart(document.getElementById('allocChart'), {
+  type: 'doughnut',
+  data: {
+    labels: assets.map(c => c.name),
+    datasets: [{
+      data: assets.map(c => c.amount),
+      backgroundColor: assets.map(c => c.color),
+      borderColor: '#0a0c10',
+      borderWidth: 3,
+      hoverOffset: 6
+    }]
+  },
+  options: {
+    cutout: '68%',
+    responsive: true,
+    maintainAspectRatio: true,
+    plugins: {
+      legend: { display: false },
+      tooltip: {
+        backgroundColor: '#181c24',
+        borderColor: '#1e2330',
+        borderWidth: 1,
+        titleColor: '#c9d1e0',
+        bodyColor: '#e8edf5',
+        titleFont: { family: 'JetBrains Mono', size: 11 },
+        bodyFont: { family: 'JetBrains Mono', size: 12 },
+        callbacks: {
+          label: item => ` ${fmt(item.raw)}원 (${(item.raw/totalAsset*100).toFixed(1)}%)`
+        }
+      }
+    }
+  }
+});
+
+// 범례
+const legendEl = document.getElementById('legend');
+assets.forEach(c => {
+  const pct = (c.amount / totalAsset * 100).toFixed(1);
+  legendEl.innerHTML += `
+    <div class="legend-item">
+      <div class="legend-dot" style="background:${c.color}"></div>
+      <span class="legend-name">${c.name}</span>
+      <span class="legend-amt">${fmt(c.amount)}원</span>
+      <span class="legend-pct">${pct}%</span>
+    </div>`;
+});
+
+// ── 아코디언 카테고리 ─────────────────────────────────────────
+const catEl = document.getElementById('categories');
+DATA.categories.forEach(cat => {
+  const isNeg = cat.amount < 0;
+  const deltaHtml = cat.delta
+    ? `<span class="cat-delta ${cat.delta > 0 ? 'up' : 'down'}">${cat.delta > 0 ? '▲' : '▼'}${fmt(Math.abs(cat.delta))}</span>`
+    : '';
+
+  let itemsHtml = '';
+
+  if (cat.brokers) {
+    // 브로커별 서브 아코디언
+    const totalInvest = cat.amount;
+    itemsHtml = cat.brokers.map(b => {
+      const pct = (b.amount / totalInvest * 100).toFixed(1);
+      const holdingsHtml = b.holdings.map(h => {
+        const hPct = (h.amount / b.amount * 100).toFixed(1);
+        return `
+          <div class="holding-row">
+            <span class="holding-name">${h.name}</span>
+            <span class="holding-amt">${fmt(h.amount)}원</span>
+            <span class="holding-pct">${hPct}%</span>
+          </div>`;
+      }).join('');
+      return `
+        <div class="broker-section" id="broker-${b.id}">
+          <div class="broker-header" onclick="toggleBroker('${b.id}')">
+            <div class="broker-dot" style="background:${b.color}"></div>
+            <span class="broker-name">${b.name}</span>
+            <span class="broker-count">${b.holdings.length}종목</span>
+            <span class="broker-amt">${fmt(b.amount)}원</span>
+            <span style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--dim);margin-left:6px">${pct}%</span>
+            <span class="broker-chevron">▼</span>
+          </div>
+          <div class="broker-body">${holdingsHtml}</div>
+        </div>`;
+    }).join('');
+  } else {
+    itemsHtml = cat.items.map(item => {
+      const isItemNeg = item.amount < 0;
+      const subHtml = item.sub
+        ? `<div class="sub-row-sub ${item.sub.startsWith('▲') ? 'up' : ''}">${item.sub}</div>`
+        : '';
+      return `
+        <div class="sub-row">
+          <div class="sub-row-icon">•</div>
+          <div class="sub-row-info">
+            <div class="sub-row-name">${item.name}</div>
+            ${item.note ? `<div class="sub-row-note">${item.note}</div>` : ''}
+          </div>
+          <div class="sub-row-right">
+            <div class="sub-row-amt ${isItemNeg ? 'neg' : ''}">${fmtFull(item.amount)}</div>
+            ${subHtml}
+          </div>
+        </div>`;
+    }).join('');
+  }
+
+  const noteHtml = cat.note
+    ? `<div class="cat-summary">${cat.note}</div>`
+    : '';
+
+  catEl.innerHTML += `
+    <div class="cat-card" id="cat-${cat.id}">
+      <div class="cat-header" onclick="toggle('${cat.id}')">
+        <span class="cat-icon">${cat.icon}</span>
+        <span class="cat-name">${cat.name}</span>
+        <span class="cat-amount ${isNeg ? 'negative' : 'positive'}">${fmtFull(cat.amount)}</span>
+        ${deltaHtml}
+        <span class="cat-chevron">▼</span>
+      </div>
+      <div class="cat-body">
+        ${itemsHtml}
+        ${noteHtml}
+      </div>
+    </div>`;
+});
+
+function toggle(id) {
+  document.getElementById('cat-' + id).classList.toggle('open');
+}
+
+function toggleBroker(id) {
+  document.getElementById('broker-' + id).classList.toggle('open');
+}
+
+// 부동산·대출 기본 열기
+['realestate','loan'].forEach(id => {
+  document.getElementById('cat-' + id)?.classList.add('open');
+});
+</script>
+</body>
+</html>

@@ -18,6 +18,10 @@
 ├── hlth/
 │   ├── index.html   # InBody 건강 추이 대시보드
 │   └── data.js      # 측정 데이터 (새 측정 시 이 파일에 추가)
+├── nvst/
+│   └── index.html   # 자산·투자 현황판 (순자산, 포트폴리오, 부동산, 대출)
+├── lngg/
+│   └── index.html   # 여행 기록 (해외여행 일정)
 └── 7-dashboard/
     └── index.html   # 2026 신년계획 대시보드 (PLAN-14)
 ```

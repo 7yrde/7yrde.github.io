@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>여행·언어 | 7년의 밤</title>
+  <script src="/auth.js"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;700&family=JetBrains+Mono:wght@300;400;600&display=swap');
+
+    :root {
+      --bg:#0a0c10; --bg2:#111318; --bg3:#181c24;
+      --border:#1e2330; --accent:#4c7cff; --accent2:#7b4fff;
+      --green:#4ade80; --red:#f87171; --yellow:#fbbf24; --purple:#a78bfa; --orange:#fb923c;
+      --text:#c9d1e0; --dim:#5a6478; --bright:#e8edf5;
+      --glow:rgba(76,124,255,.12);
+    }
+    *{margin:0;padding:0;box-sizing:border-box}
+    body{background:var(--bg);color:var(--text);font-family:'Noto Sans KR',sans-serif;font-weight:300;min-height:100vh}
+
+    .stars{position:fixed;inset:0;z-index:0;pointer-events:none}
+    .stars::before{content:'';position:absolute;inset:0;
+      background-image:
+        radial-gradient(1px 1px at 12% 20%,#fff 0%,transparent 100%),
+        radial-gradient(1px 1px at 38% 55%,#fff 0%,transparent 100%),
+        radial-gradient(1px 1px at 67% 18%,#fff 0%,transparent 100%),
+        radial-gradient(1px 1px at 82% 72%,#fff 0%,transparent 100%),
+        radial-gradient(1.5px 1.5px at 50% 85%,rgba(255,255,255,.6) 0%,transparent 100%),
+        radial-gradient(1px 1px at 25% 90%,#fff 0%,transparent 100%),
+        radial-gradient(1px 1px at 92% 40%,#fff 0%,transparent 100%);
+      opacity:.3;animation:tw 10s ease-in-out infinite alternate}
+    @keyframes tw{0%{opacity:.2}100%{opacity:.4}}
+
+    .wrap{position:relative;z-index:1;max-width:960px;margin:0 auto;padding:0 24px}
+
+    nav{display:flex;align-items:center;gap:16px;padding:28px 0;border-bottom:1px solid var(--border);margin-bottom:40px}
+    .nav-back{font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--dim);text-decoration:none;transition:color .2s}
+    .nav-back:hover{color:var(--accent)}
+    .nav-sep{color:var(--border)}
+    .nav-cur{font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--accent)}
+
+    .page-label{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--accent);letter-spacing:4px;text-transform:uppercase;margin-bottom:12px}
+    .page-title{font-size:clamp(26px,5vw,38px);font-weight:700;color:var(--bright);margin-bottom:8px}
+    .page-sub{font-size:14px;color:var(--dim);margin-bottom:48px;line-height:1.7}
+
+    /* 여행 카드 */
+    .trip-card{background:var(--bg2);border:1px solid var(--border);border-radius:16px;overflow:hidden;margin-bottom:20px;transition:border-color .3s}
+    .trip-card:hover{border-color:rgba(76,124,255,.4)}
+
+    .trip-header{padding:28px 28px 24px;display:flex;flex-wrap:wrap;gap:20px;align-items:flex-start;cursor:pointer;user-select:none}
+    .trip-header-main{flex:1;min-width:200px}
+    .trip-tag{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--accent);letter-spacing:2px;text-transform:uppercase;background:rgba(76,124,255,.1);border:1px solid rgba(76,124,255,.2);padding:3px 8px;border-radius:4px;width:fit-content;margin-bottom:12px}
+    .trip-title{font-size:20px;font-weight:700;color:var(--bright);margin-bottom:6px}
+    .trip-subtitle{font-size:13px;color:var(--dim)}
+
+    .trip-meta{display:flex;flex-direction:column;gap:8px;align-items:flex-end}
+    .trip-date{font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--accent)}
+    .trip-nights{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--dim)}
+    .trip-chevron{font-size:11px;color:var(--dim);transition:transform .25s;margin-top:4px}
+    .trip-card.open .trip-chevron{transform:rotate(180deg)}
+
+    .trip-body{display:none;border-top:1px solid var(--border);padding:24px 28px 28px}
+    .trip-card.open .trip-body{display:block}
+
+    /* 키워드 태그 */
+    .keyword-row{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:28px}
+    .kw{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--purple);background:rgba(167,139,250,.08);border:1px solid rgba(167,139,250,.2);padding:4px 10px;border-radius:20px}
+
+    /* 항공 */
+    .section-title{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--dim);letter-spacing:3px;text-transform:uppercase;margin-bottom:14px}
+    .flight-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:28px}
+    .flight-card{background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:16px}
+    .flight-dir{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--accent);letter-spacing:2px;margin-bottom:8px}
+    .flight-route{font-size:14px;font-weight:700;color:var(--bright);margin-bottom:4px}
+    .flight-info{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--dim)}
+
+    /* 일정 타임라인 */
+    .timeline{display:flex;flex-direction:column;gap:0}
+    .tl-day{display:grid;grid-template-columns:80px 1fr;gap:0;position:relative}
+    .tl-day::before{content:'';position:absolute;left:38px;top:28px;bottom:0;width:1px;background:linear-gradient(to bottom,var(--border),transparent)}
+    .tl-day:last-child::before{display:none}
+    .tl-date{padding-top:20px;text-align:right;padding-right:20px;flex-shrink:0}
+    .tl-date-num{font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:600;color:var(--bright)}
+    .tl-date-day{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--dim)}
+    .tl-dot{position:absolute;left:33px;top:24px;width:12px;height:12px;border-radius:50%;background:var(--bg3);border:2px solid var(--accent)}
+    .tl-content{padding:16px 0 20px 28px;border-left:none}
+    .tl-label{font-size:13px;font-weight:700;color:var(--bright);margin-bottom:6px}
+    .tl-items{display:flex;flex-direction:column;gap:4px}
+    .tl-item{font-size:12px;color:var(--dim);padding-left:12px;position:relative}
+    .tl-item::before{content:'·';position:absolute;left:0;color:var(--dim)}
+
+    footer{border-top:1px solid var(--border);padding:36px 0;text-align:center;margin-top:40px}
+    .footer-text{font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--dim)}
+
+    @media(max-width:600px){
+      .flight-grid{grid-template-columns:1fr}
+      .trip-header{flex-direction:column;gap:12px}
+      .trip-meta{align-items:flex-start}
+    }
+  </style>
+</head>
+<body>
+<div class="stars"></div>
+<div class="wrap">
+  <nav>
+    <a href="../" class="nav-back">← 7년의 밤</a>
+    <span class="nav-sep">/</span>
+    <span class="nav-cur">lngg</span>
+  </nav>
+
+  <div class="page-label">// language · travel</div>
+  <h1 class="page-title">여행 기록</h1>
+  <p class="page-sub">가본 곳, 갈 곳, 그 사이의 언어들.</p>
+
+  <!-- 여행 카드 목록 -->
+  <div id="trips"></div>
+</div>
+
+<footer>
+  <div class="wrap">
+    <div class="footer-text">7YR · lngg · 여행 기록</div>
+  </div>
+</footer>
+
+<script>
+const TRIPS = [
+  {
+    id: "sapporo-2604",
+    tag: "Japan · 홋카이도",
+    title: "삿포로",
+    subtitle: "온천·료칸·쉬기·생각정리",
+    dateRange: "2026.04.17 – 04.21",
+    nights: "4박 5일",
+    keywords: ["온천", "료칸", "휴식", "생각정리", "홋카이도"],
+    flights: [
+      { dir: "출발", route: "ICN → CTS", info: "TW263" },
+      { dir: "귀국", route: "CTS → ICN", info: "TW264" }
+    ],
+    vacation: "금·월·화 (휴가 3일)",
+    days: [
+      { date: "04.17", day: "금", label: "출발", items: ["인천 출발 (TW263)", "신치토세 도착", "삿포로 시내 이동"] },
+      { date: "04.18", day: "토", label: "탐색", items: ["삿포로 시내", "오도리 공원", "스스키노"] },
+      { date: "04.19", day: "일", label: "온천·료칸", items: ["료칸 체크인", "온천 (노천·실내)", "저녁 카이세키"] },
+      { date: "04.20", day: "월", label: "휴식", items: ["늦잠·료칸 아침", "온천 재방문", "느긋한 산책"] },
+      { date: "04.21", day: "화", label: "귀국", items: ["신치토세 이동", "인천 귀국 (TW264)"] }
+    ],
+    open: true
+  }
+];
+
+const tripsEl = document.getElementById('trips');
+
+TRIPS.forEach(trip => {
+  const kwHtml = trip.keywords.map(k => `<span class="kw">${k}</span>`).join('');
+
+  const flightHtml = trip.flights.map(f => `
+    <div class="flight-card">
+      <div class="flight-dir">${f.dir}</div>
+      <div class="flight-route">${f.route}</div>
+      <div class="flight-info">${f.info}</div>
+    </div>`).join('');
+
+  const timelineHtml = trip.days.map(d => `
+    <div class="tl-day">
+      <div class="tl-dot"></div>
+      <div class="tl-date">
+        <div class="tl-date-num">${d.date}</div>
+        <div class="tl-date-day">${d.day}</div>
+      </div>
+      <div class="tl-content">
+        <div class="tl-label">${d.label}</div>
+        <div class="tl-items">
+          ${d.items.map(i => `<div class="tl-item">${i}</div>`).join('')}
+        </div>
+      </div>
+    </div>`).join('');
+
+  const card = document.createElement('div');
+  card.className = 'trip-card' + (trip.open ? ' open' : '');
+  card.id = 'trip-' + trip.id;
+  card.innerHTML = `
+    <div class="trip-header" onclick="toggleTrip('${trip.id}')">
+      <div class="trip-header-main">
+        <div class="trip-tag">${trip.tag}</div>
+        <div class="trip-title">${trip.title}</div>
+        <div class="trip-subtitle">${trip.subtitle}</div>
+      </div>
+      <div class="trip-meta">
+        <span class="trip-date">${trip.dateRange}</span>
+        <span class="trip-nights">${trip.nights}</span>
+        <span class="trip-chevron">▼</span>
+      </div>
+    </div>
+    <div class="trip-body">
+      <div class="keyword-row">${kwHtml}</div>
+
+      <div class="section-title">항공편</div>
+      <div class="flight-grid">${flightHtml}</div>
+
+      <div style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--dim);margin-bottom:24px">
+        휴가 · ${trip.vacation}
+      </div>
+
+      <div class="section-title">일정</div>
+      <div class="timeline">${timelineHtml}</div>
+    </div>`;
+  tripsEl.appendChild(card);
+});
+
+function toggleTrip(id) {
+  document.getElementById('trip-' + id).classList.toggle('open');
+}
+</script>
+</body>
+</html>
