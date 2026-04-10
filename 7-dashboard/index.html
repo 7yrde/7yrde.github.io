@@ -6,23 +6,25 @@
   <title>7-Dashboard | 7년의 밤</title>
   <script src="/auth.js"></script>
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;700&family=JetBrains+Mono:wght@300;400&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;700&family=JetBrains+Mono:wght@300;400;600&display=swap');
 
     :root {
-      --bg: #0a0c10;
-      --bg2: #111318;
-      --bg3: #181c24;
-      --border: #1e2330;
-      --accent: #4c7cff;
-      --accent2: #7b4fff;
-      --text: #c9d1e0;
-      --text-dim: #5a6478;
-      --text-bright: #e8edf5;
-      --glow: rgba(76, 124, 255, 0.15);
+      --bg:    #0a0c10;
+      --bg2:   #111318;
+      --bg3:   #181c24;
+      --border:#1e2330;
+      --accent:#4c7cff;
+      --accent2:#7b4fff;
+      --green: #4ade80;
+      --yellow:#fbbf24;
+      --red:   #f87171;
+      --text:  #c9d1e0;
+      --dim:   #5a6478;
+      --bright:#e8edf5;
     }
 
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    html { scroll-behavior: smooth; }
+    * { margin:0; padding:0; box-sizing:border-box; }
+    html { scroll-behavior:smooth; }
 
     body {
       background: var(--bg);
@@ -32,213 +34,461 @@
       min-height: 100vh;
     }
 
-    .stars {
-      position: fixed;
-      inset: 0;
-      z-index: 0;
-      pointer-events: none;
-    }
+    /* stars */
+    .stars { position:fixed; inset:0; z-index:0; pointer-events:none; }
     .stars::before {
-      content: '';
-      position: absolute;
-      inset: 0;
+      content:'';
+      position:absolute; inset:0;
       background-image:
-        radial-gradient(1px 1px at 12% 18%, #fff 0%, transparent 100%),
-        radial-gradient(1px 1px at 28% 44%, #fff 0%, transparent 100%),
-        radial-gradient(1px 1px at 43% 9%, #fff 0%, transparent 100%),
-        radial-gradient(1px 1px at 57% 63%, #fff 0%, transparent 100%),
-        radial-gradient(1px 1px at 72% 32%, #fff 0%, transparent 100%),
-        radial-gradient(1px 1px at 87% 77%, #fff 0%, transparent 100%),
-        radial-gradient(1.5px 1.5px at 6% 53%, rgba(255,255,255,0.8) 0%, transparent 100%),
-        radial-gradient(1.5px 1.5px at 79% 14%, rgba(255,255,255,0.8) 0%, transparent 100%),
-        radial-gradient(2px 2px at 93% 58%, rgba(255,255,255,0.5) 0%, transparent 100%);
-      opacity: 0.35;
-      animation: twinkle 10s ease-in-out infinite alternate;
+        radial-gradient(1px 1px at 10% 15%,#fff 0%,transparent 100%),
+        radial-gradient(1px 1px at 25% 40%,#fff 0%,transparent 100%),
+        radial-gradient(1px 1px at 55% 60%,#fff 0%,transparent 100%),
+        radial-gradient(1px 1px at 70% 30%,#fff 0%,transparent 100%),
+        radial-gradient(1px 1px at 85% 75%,#fff 0%,transparent 100%),
+        radial-gradient(1.5px 1.5px at 40% 85%,rgba(255,255,255,.7) 0%,transparent 100%),
+        radial-gradient(1.5px 1.5px at 90% 20%,rgba(255,255,255,.7) 0%,transparent 100%);
+      opacity:.3;
+      animation: tw 10s ease-in-out infinite alternate;
     }
-    @keyframes twinkle {
-      0%   { opacity: 0.2; }
-      100% { opacity: 0.45; }
+    @keyframes tw { 0%{opacity:.2} 100%{opacity:.4} }
+
+    .wrap {
+      position:relative; z-index:1;
+      max-width:1080px; margin:0 auto; padding:0 24px;
     }
 
-    .wrapper {
-      position: relative;
-      z-index: 1;
-      max-width: 960px;
-      margin: 0 auto;
-      padding: 0 24px;
-    }
-
+    /* nav */
     nav {
-      display: flex;
-      align-items: center;
-      gap: 16px;
-      padding: 28px 0;
-      border-bottom: 1px solid var(--border);
-      margin-bottom: 60px;
+      display:flex; align-items:center; gap:16px;
+      padding:28px 0; border-bottom:1px solid var(--border);
+      margin-bottom:48px;
     }
-
     .nav-back {
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 12px;
-      color: var(--text-dim);
-      text-decoration: none;
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      transition: color 0.2s;
+      font-family:'JetBrains Mono',monospace; font-size:12px;
+      color:var(--dim); text-decoration:none;
+      display:flex; align-items:center; gap:6px;
+      transition:color .2s;
     }
-    .nav-back:hover { color: var(--accent); }
-
-    .nav-sep { color: var(--border); font-size: 14px; }
-
-    .nav-current {
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 12px;
-      color: var(--accent);
+    .nav-back:hover { color:var(--accent); }
+    .nav-sep { color:var(--border); }
+    .nav-cur {
+      font-family:'JetBrains Mono',monospace; font-size:12px;
+      color:var(--accent);
     }
 
+    /* page header */
     .page-header {
-      margin-bottom: 64px;
+      display:flex; align-items:flex-end; justify-content:space-between;
+      flex-wrap:wrap; gap:16px; margin-bottom:48px;
     }
-
     .page-label {
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 11px;
-      color: var(--accent);
-      letter-spacing: 4px;
-      text-transform: uppercase;
-      margin-bottom: 16px;
+      font-family:'JetBrains Mono',monospace; font-size:11px;
+      color:var(--accent); letter-spacing:4px; text-transform:uppercase;
+      margin-bottom:10px;
     }
-
     .page-title {
-      font-size: clamp(32px, 6vw, 48px);
-      font-weight: 700;
-      color: var(--text-bright);
-      margin-bottom: 12px;
-      line-height: 1.1;
+      font-size:clamp(26px,5vw,38px); font-weight:700;
+      color:var(--bright); line-height:1.15;
+    }
+    .page-title span {
+      background:linear-gradient(135deg,#4c7cff,#a78bfa);
+      -webkit-background-clip:text; -webkit-text-fill-color:transparent;
+      background-clip:text;
+    }
+    .keyword-badge {
+      background:rgba(76,124,255,.1);
+      border:1px solid rgba(76,124,255,.25);
+      border-radius:20px; padding:8px 18px;
+      font-size:13px; color:var(--accent);
+      font-family:'JetBrains Mono',monospace;
+      white-space:nowrap;
+    }
+    .keyword-badge em { font-style:normal; color:var(--bright); font-weight:600; }
+
+    /* tldr box */
+    .tldr {
+      background:var(--bg2); border:1px solid var(--border);
+      border-left:3px solid var(--accent2); border-radius:10px;
+      padding:24px 28px; margin-bottom:48px;
+    }
+    .tldr-title {
+      font-family:'JetBrains Mono',monospace; font-size:11px;
+      color:var(--accent2); letter-spacing:3px; text-transform:uppercase;
+      margin-bottom:16px;
+    }
+    .tldr-grid {
+      display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr));
+      gap:12px;
+    }
+    .tldr-group { display:flex; flex-direction:column; gap:6px; }
+    .tldr-group-label {
+      font-size:10px; color:var(--dim); letter-spacing:2px;
+      text-transform:uppercase; font-family:'JetBrains Mono',monospace;
+    }
+    .tldr-item {
+      font-size:13px; color:var(--text); line-height:1.6;
+      display:flex; align-items:center; gap:8px;
+    }
+    .tldr-item::before {
+      content:''; width:4px; height:4px; border-radius:50%;
+      background:var(--accent); flex-shrink:0;
     }
 
-    .page-desc {
-      font-size: 14px;
-      color: var(--text-dim);
-      line-height: 1.8;
-      max-width: 520px;
+    /* section */
+    .section-label {
+      font-family:'JetBrains Mono',monospace; font-size:11px;
+      color:var(--accent); letter-spacing:4px; text-transform:uppercase;
+      margin-bottom:12px;
+    }
+    .section-title {
+      font-size:18px; font-weight:700; color:var(--bright);
+      margin-bottom:24px;
     }
 
-    /* Empty state */
-    .empty-state {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      padding: 100px 24px;
-      text-align: center;
-      border: 1px dashed var(--border);
-      border-radius: 16px;
-      gap: 16px;
+    /* goal cards grid */
+    .goals-grid {
+      display:grid;
+      grid-template-columns:repeat(auto-fill,minmax(300px,1fr));
+      gap:20px; margin-bottom:56px;
     }
 
-    .empty-icon {
-      font-size: 48px;
-      opacity: 0.4;
+    .goal-card {
+      background:var(--bg2); border:1px solid var(--border);
+      border-radius:12px; padding:24px;
+      display:flex; flex-direction:column; gap:14px;
+      transition:border-color .25s, box-shadow .25s;
+    }
+    .goal-card:hover {
+      border-color:rgba(76,124,255,.4);
+      box-shadow:0 0 24px rgba(76,124,255,.07);
     }
 
-    .empty-title {
-      font-size: 16px;
-      color: var(--text-dim);
-      font-family: 'JetBrains Mono', monospace;
+    .goal-card-head {
+      display:flex; align-items:center; justify-content:space-between;
+    }
+    .goal-icon { font-size:22px; line-height:1; }
+    .goal-cat {
+      font-family:'JetBrains Mono',monospace; font-size:10px;
+      color:var(--dim); letter-spacing:2px; text-transform:uppercase;
+      background:var(--bg3); border:1px solid var(--border);
+      padding:3px 8px; border-radius:4px;
     }
 
-    .empty-sub {
-      font-size: 13px;
-      color: #333a4d;
-      line-height: 1.7;
+    .goal-title {
+      font-size:16px; font-weight:700; color:var(--bright);
     }
 
-    /* Info box */
-    .info-box {
-      background: var(--bg2);
-      border: 1px solid var(--border);
-      border-left: 3px solid var(--accent);
-      border-radius: 8px;
-      padding: 20px 24px;
-      margin-bottom: 40px;
-      font-size: 13px;
-      color: var(--text-dim);
-      line-height: 1.8;
+    .goal-items { display:flex; flex-direction:column; gap:8px; }
+    .goal-item {
+      font-size:13px; color:var(--text); line-height:1.6;
+      display:flex; align-items:flex-start; gap:8px;
+    }
+    .goal-item-bullet {
+      margin-top:5px; width:5px; height:5px; border-radius:50%;
+      flex-shrink:0; background:var(--border);
+    }
+    .goal-item-bullet.main { background:var(--accent); }
+
+    /* progress bar */
+    .progress-wrap { display:flex; flex-direction:column; gap:6px; margin-top:4px; }
+    .progress-label {
+      display:flex; justify-content:space-between;
+      font-family:'JetBrains Mono',monospace; font-size:11px;
+      color:var(--dim);
+    }
+    .progress-bar {
+      height:4px; background:var(--bg3); border-radius:4px; overflow:hidden;
+    }
+    .progress-fill {
+      height:100%; border-radius:4px;
+      background:linear-gradient(90deg,var(--accent),var(--accent2));
+      transition:width 1s ease;
     }
 
-    .info-box strong {
-      color: var(--text);
-      font-weight: 400;
+    /* points section */
+    .points-grid {
+      display:grid; grid-template-columns:repeat(auto-fill,minmax(260px,1fr));
+      gap:16px; margin-bottom:56px;
+    }
+    .point-card {
+      background:var(--bg2); border:1px solid var(--border);
+      border-radius:10px; padding:20px;
+    }
+    .point-num {
+      font-family:'JetBrains Mono',monospace; font-size:11px;
+      color:var(--accent2); margin-bottom:8px;
+    }
+    .point-title {
+      font-size:13px; font-weight:700; color:var(--bright);
+      margin-bottom:6px;
+    }
+    .point-desc {
+      font-size:12px; color:var(--dim); line-height:1.7;
     }
 
-    .info-box code {
-      font-family: 'JetBrains Mono', monospace;
-      background: rgba(76, 124, 255, 0.08);
-      padding: 1px 6px;
-      border-radius: 4px;
-      color: var(--accent);
-      font-size: 12px;
-    }
-
+    /* footer */
     footer {
-      border-top: 1px solid var(--border);
-      padding: 36px 0;
-      text-align: center;
-      margin-top: 80px;
+      border-top:1px solid var(--border);
+      padding:36px 0; text-align:center; margin-top:40px;
+    }
+    .footer-text {
+      font-family:'JetBrains Mono',monospace; font-size:12px;
+      color:var(--dim);
+    }
+    .footer-ref {
+      font-size:11px; color:#2a3040; margin-top:6px;
     }
 
-    .footer-logo {
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 12px;
-      color: var(--text-dim);
+    @media(max-width:600px) {
+      .goals-grid { grid-template-columns:1fr; }
+      .tldr-grid  { grid-template-columns:1fr; }
     }
   </style>
 </head>
 <body>
 
-  <div class="stars"></div>
+<div class="stars"></div>
 
-  <div class="wrapper">
-    <nav>
-      <a href="../" class="nav-back">← 7년의 밤</a>
-      <span class="nav-sep">/</span>
-      <span class="nav-current">7-dashboard</span>
-    </nav>
+<div class="wrap">
+  <nav>
+    <a href="../" class="nav-back">← 7년의 밤</a>
+    <span class="nav-sep">/</span>
+    <span class="nav-cur">7-dashboard</span>
+  </nav>
 
-    <div class="page-header">
-      <div class="page-label">// dashboard</div>
-      <h1 class="page-title">7-Dashboard</h1>
-      <p class="page-desc">
-        7YR 전용 대시보드 정적 빌드 페이지입니다.<br />
-        빌드된 파일을 이 디렉토리에 배포하면 바로 확인할 수 있습니다.
-      </p>
+  <!-- header -->
+  <div class="page-header">
+    <div>
+      <div class="page-label">// 2026 plan</div>
+      <h1 class="page-title"><span>2026</span> 신년계획</h1>
     </div>
+    <div class="keyword-badge">키워드 · <em>현상유지</em>(26)</div>
+  </div>
 
-    <div class="info-box">
-      <strong>배포 방법</strong><br />
-      <code>7-dashboard</code> 프로젝트를 빌드한 후, 빌드 결과물(<code>dist/</code> 또는 <code>build/</code>)을
-      이 <code>7-dashboard/</code> 디렉토리에 복사하거나 교체해주세요.<br />
-      GitHub Pages에서 자동으로 서빙됩니다.
-    </div>
-
-    <!-- 빌드 파일 배포 전 빈 상태 -->
-    <div class="empty-state">
-      <div class="empty-icon">📊</div>
-      <div class="empty-title">// build not deployed</div>
-      <div class="empty-sub">
-        아직 대시보드 빌드가 배포되지 않았습니다.<br />
-        빌드 결과물을 <code style="font-family: JetBrains Mono, monospace; color: #3a4a6a;">7-dashboard/</code> 디렉토리에 넣어주세요.
+  <!-- TL;DR -->
+  <div class="tldr">
+    <div class="tldr-title">// tl;dr</div>
+    <div class="tldr-grid">
+      <div class="tldr-group">
+        <div class="tldr-group-label">메인</div>
+        <div class="tldr-item">컴퓨터 — 보안, 개발 경력</div>
+        <div class="tldr-item">음악 — 음원, 영상 제작/배포</div>
+      </div>
+      <div class="tldr-group">
+        <div class="tldr-group-label">서브</div>
+        <div class="tldr-item">돈 — 4억 만들기</div>
+        <div class="tldr-item">건강 — 헬스, 복싱</div>
+        <div class="tldr-item">언어 — 일본어, 영어</div>
+      </div>
+      <div class="tldr-group">
+        <div class="tldr-group-label">기타</div>
+        <div class="tldr-item">시스템 만들기</div>
+        <div class="tldr-item">결혼 준비</div>
       </div>
     </div>
   </div>
 
-  <footer>
-    <div class="wrapper">
-      <div class="footer-logo">7YR · 7년의 밤 · 7-dashboard</div>
+  <!-- 목표 카드 -->
+  <div class="section-label">// goals</div>
+  <div class="section-title">연간 목표</div>
+  <div class="goals-grid">
+
+    <!-- 컴퓨터 -->
+    <div class="goal-card">
+      <div class="goal-card-head">
+        <span class="goal-icon">💻</span>
+        <span class="goal-cat">main</span>
+      </div>
+      <div class="goal-title">컴퓨터</div>
+      <div class="goal-items">
+        <div class="goal-item">
+          <div class="goal-item-bullet main"></div>
+          Service Security 전문가 + 전문영역 구축
+        </div>
+        <div class="goal-item">
+          <div class="goal-item-bullet main"></div>
+          백엔드 + DevOps (ADOS, 7yr+bxyz)
+        </div>
+      </div>
+      <div class="progress-wrap">
+        <div class="progress-label"><span>진행률</span><span>진행 중</span></div>
+        <div class="progress-bar"><div class="progress-fill" style="width:25%"></div></div>
+      </div>
     </div>
-  </footer>
+
+    <!-- 음악 -->
+    <div class="goal-card">
+      <div class="goal-card-head">
+        <span class="goal-icon">🎵</span>
+        <span class="goal-cat">main</span>
+      </div>
+      <div class="goal-title">음악</div>
+      <div class="goal-items">
+        <div class="goal-item">
+          <div class="goal-item-bullet main"></div>
+          distrokid 음원 <strong style="color:var(--bright)">10건</strong> 이상 발매 (+suno)
+        </div>
+        <div class="goal-item">
+          <div class="goal-item-bullet main"></div>
+          영상 <strong style="color:var(--bright)">20건</strong> 이상 업로드 (각 채널)
+        </div>
+      </div>
+      <div class="progress-wrap">
+        <div class="progress-label"><span>음원</span><span>0 / 10</span></div>
+        <div class="progress-bar"><div class="progress-fill" style="width:0%"></div></div>
+        <div class="progress-label" style="margin-top:6px"><span>영상</span><span>0 / 20</span></div>
+        <div class="progress-bar"><div class="progress-fill" style="width:0%"></div></div>
+      </div>
+    </div>
+
+    <!-- 돈 -->
+    <div class="goal-card">
+      <div class="goal-card-head">
+        <span class="goal-icon">💰</span>
+        <span class="goal-cat">sub</span>
+      </div>
+      <div class="goal-title">돈</div>
+      <div class="goal-items">
+        <div class="goal-item">
+          <div class="goal-item-bullet main"></div>
+          주식계좌 여윳돈 <strong style="color:var(--bright)">4억</strong>까지
+        </div>
+        <div class="goal-item">
+          <div class="goal-item-bullet"></div>
+          ISA, IRP, 연금저축 포함
+        </div>
+      </div>
+      <div class="progress-wrap">
+        <div class="progress-label"><span>목표 4억</span><span>진행 중</span></div>
+        <div class="progress-bar"><div class="progress-fill" style="width:0%"></div></div>
+      </div>
+    </div>
+
+    <!-- 건강 -->
+    <div class="goal-card">
+      <div class="goal-card-head">
+        <span class="goal-icon">🥊</span>
+        <span class="goal-cat">sub</span>
+      </div>
+      <div class="goal-title">건강</div>
+      <div class="goal-items">
+        <div class="goal-item">
+          <div class="goal-item-bullet main"></div>
+          헬스 구력 2년 · 골격근 <strong style="color:var(--bright)">38kg</strong>
+        </div>
+        <div class="goal-item">
+          <div class="goal-item-bullet main"></div>
+          복싱 <strong style="color:var(--bright)">6개월</strong> 이상
+        </div>
+      </div>
+      <div class="progress-wrap">
+        <div class="progress-label"><span>헬스</span><span>진행 중</span></div>
+        <div class="progress-bar"><div class="progress-fill" style="width:40%"></div></div>
+        <div class="progress-label" style="margin-top:6px"><span>복싱</span><span>진행 중</span></div>
+        <div class="progress-bar"><div class="progress-fill" style="width:20%"></div></div>
+      </div>
+    </div>
+
+    <!-- 언어 -->
+    <div class="goal-card">
+      <div class="goal-card-head">
+        <span class="goal-icon">🗣️</span>
+        <span class="goal-cat">sub</span>
+      </div>
+      <div class="goal-title">언어</div>
+      <div class="goal-items">
+        <div class="goal-item">
+          <div class="goal-item-bullet main"></div>
+          일본어, 영어 아쉽지 않게 발전
+        </div>
+        <div class="goal-item">
+          <div class="goal-item-bullet"></div>
+          수업, 여행, 시험
+        </div>
+      </div>
+      <div class="progress-wrap">
+        <div class="progress-label"><span>진행률</span><span>진행 중</span></div>
+        <div class="progress-bar"><div class="progress-fill" style="width:15%"></div></div>
+      </div>
+    </div>
+
+    <!-- 시스템 + 결혼 -->
+    <div class="goal-card">
+      <div class="goal-card-head">
+        <span class="goal-icon">⚙️</span>
+        <span class="goal-cat">etc</span>
+      </div>
+      <div class="goal-title">시스템 &amp; 기타</div>
+      <div class="goal-items">
+        <div class="goal-item">
+          <div class="goal-item-bullet main"></div>
+          7yr.kr 시스템 — KPI·키워드 체크리스트화
+        </div>
+        <div class="goal-item">
+          <div class="goal-item-bullet main"></div>
+          잭도컴퍼니 부흥 — Jira 체계화
+        </div>
+        <div class="goal-item">
+          <div class="goal-item-bullet"></div>
+          결혼 준비 — 외모 관리, 이성 탐색
+        </div>
+      </div>
+      <div class="progress-wrap">
+        <div class="progress-label"><span>진행률</span><span>진행 중</span></div>
+        <div class="progress-bar"><div class="progress-fill" style="width:10%"></div></div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- 키워드/철학 -->
+  <div class="section-label">// keywords</div>
+  <div class="section-title">행동 키워드</div>
+  <div class="points-grid">
+    <div class="point-card">
+      <div class="point-num">(26)</div>
+      <div class="point-title">현상유지</div>
+      <div class="point-desc">잘 되는 건 신뢰하고 유지하자. 포맷이 최대한 덜 바뀌어야 안정성.</div>
+    </div>
+    <div class="point-card">
+      <div class="point-num">(21)</div>
+      <div class="point-title">우선순위</div>
+      <div class="point-desc">프로젝트 수행 전 우선순위 선별.</div>
+    </div>
+    <div class="point-card">
+      <div class="point-num">(22)</div>
+      <div class="point-title">연속성</div>
+      <div class="point-desc">연속성을 띠며 업무 수행.</div>
+    </div>
+    <div class="point-card">
+      <div class="point-num">(18)</div>
+      <div class="point-title">산출물</div>
+      <div class="point-desc">산출물 내고 publish → 유명세(23).</div>
+    </div>
+    <div class="point-card">
+      <div class="point-num">(25)</div>
+      <div class="point-title">정량화</div>
+      <div class="point-desc">산출물과 피드백은 최대한 정량화해 모니터링.</div>
+    </div>
+    <div class="point-card">
+      <div class="point-num">(19)</div>
+      <div class="point-title">아카이빙</div>
+      <div class="point-desc">이력 아카이빙 → 7yr 현황판.</div>
+    </div>
+    <div class="point-card">
+      <div class="point-num">(20)</div>
+      <div class="point-title">자동화</div>
+      <div class="point-desc">작업 과정에서 가능한 것들은 지속적으로 자동화.</div>
+    </div>
+  </div>
+
+</div><!-- /wrap -->
+
+<footer>
+  <div class="wrap">
+    <div class="footer-text">7YR · 2026 신년계획 대시보드</div>
+  </div>
+</footer>
 
 </body>
 </html>
