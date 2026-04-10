@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>7년의 밤 | 7YR</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;700&family=JetBrains+Mono:wght@300;400&display=swap');
+
+    :root {
+      --bg: #0a0c10;
+      --bg2: #111318;
+      --bg3: #181c24;
+      --border: #1e2330;
+      --accent: #4c7cff;
+      --accent2: #7b4fff;
+      --text: #c9d1e0;
+      --text-dim: #5a6478;
+      --text-bright: #e8edf5;
+      --glow: rgba(76, 124, 255, 0.15);
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Noto Sans KR', sans-serif;
+      font-weight: 300;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* --- Stars background --- */
+    .stars {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      pointer-events: none;
+      overflow: hidden;
+    }
+
+    .stars::before,
+    .stars::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background-image:
+        radial-gradient(1px 1px at 10% 15%, #fff 0%, transparent 100%),
+        radial-gradient(1px 1px at 25% 40%, #fff 0%, transparent 100%),
+        radial-gradient(1px 1px at 40% 8%, #fff 0%, transparent 100%),
+        radial-gradient(1px 1px at 55% 60%, #fff 0%, transparent 100%),
+        radial-gradient(1px 1px at 70% 30%, #fff 0%, transparent 100%),
+        radial-gradient(1px 1px at 85% 75%, #fff 0%, transparent 100%),
+        radial-gradient(1px 1px at 15% 80%, #fff 0%, transparent 100%),
+        radial-gradient(1px 1px at 60% 90%, #fff 0%, transparent 100%),
+        radial-gradient(1px 1px at 90% 20%, #fff 0%, transparent 100%),
+        radial-gradient(1px 1px at 35% 55%, #fff 0%, transparent 100%),
+        radial-gradient(1.5px 1.5px at 5% 50%, rgba(255,255,255,0.8) 0%, transparent 100%),
+        radial-gradient(1.5px 1.5px at 78% 12%, rgba(255,255,255,0.8) 0%, transparent 100%),
+        radial-gradient(1.5px 1.5px at 48% 72%, rgba(255,255,255,0.8) 0%, transparent 100%),
+        radial-gradient(2px 2px at 92% 55%, rgba(255,255,255,0.6) 0%, transparent 100%),
+        radial-gradient(2px 2px at 20% 25%, rgba(255,255,255,0.6) 0%, transparent 100%);
+      opacity: 0.4;
+    }
+
+    .stars::after {
+      background-image:
+        radial-gradient(1px 1px at 8% 65%, #fff 0%, transparent 100%),
+        radial-gradient(1px 1px at 30% 10%, #fff 0%, transparent 100%),
+        radial-gradient(1px 1px at 45% 85%, #fff 0%, transparent 100%),
+        radial-gradient(1px 1px at 62% 45%, #fff 0%, transparent 100%),
+        radial-gradient(1px 1px at 80% 70%, #fff 0%, transparent 100%),
+        radial-gradient(1px 1px at 95% 35%, #fff 0%, transparent 100%),
+        radial-gradient(1px 1px at 18% 95%, #fff 0%, transparent 100%),
+        radial-gradient(1px 1px at 72% 5%, #fff 0%, transparent 100%),
+        radial-gradient(1.5px 1.5px at 52% 28%, rgba(255,255,255,0.7) 0%, transparent 100%),
+        radial-gradient(1.5px 1.5px at 88% 85%, rgba(255,255,255,0.7) 0%, transparent 100%);
+      opacity: 0.3;
+      animation: twinkle 8s ease-in-out infinite alternate;
+    }
+
+    @keyframes twinkle {
+      0%   { opacity: 0.2; }
+      50%  { opacity: 0.5; }
+      100% { opacity: 0.2; }
+    }
+
+    /* --- Layout --- */
+    .wrapper {
+      position: relative;
+      z-index: 1;
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 0 24px;
+    }
+
+    /* --- Header / Hero --- */
+    header {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      text-align: center;
+      padding: 80px 24px 60px;
+      position: relative;
+    }
+
+    .moon {
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      background: radial-gradient(circle at 35% 35%, #fdf6e3, #e8d5a3 40%, #c8aa70 70%, #8a7040);
+      box-shadow:
+        0 0 30px rgba(232, 213, 163, 0.3),
+        0 0 80px rgba(232, 213, 163, 0.1),
+        inset -8px -8px 20px rgba(100, 80, 30, 0.4);
+      margin-bottom: 36px;
+      animation: float 6s ease-in-out infinite;
+    }
+
+    @keyframes float {
+      0%, 100% { transform: translateY(0); }
+      50%       { transform: translateY(-10px); }
+    }
+
+    .logo-num {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: clamp(56px, 10vw, 96px);
+      font-weight: 300;
+      letter-spacing: -2px;
+      background: linear-gradient(135deg, #4c7cff 0%, #7b4fff 50%, #a78bfa 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      line-height: 1;
+      margin-bottom: 8px;
+    }
+
+    .logo-text {
+      font-size: clamp(20px, 4vw, 28px);
+      font-weight: 400;
+      color: var(--text-bright);
+      letter-spacing: 6px;
+      margin-bottom: 4px;
+    }
+
+    .logo-sub {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 13px;
+      color: var(--text-dim);
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      margin-bottom: 40px;
+    }
+
+    .divider {
+      width: 60px;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, var(--accent), transparent);
+      margin: 0 auto 40px;
+    }
+
+    .hero-desc {
+      max-width: 520px;
+      font-size: 15px;
+      line-height: 1.9;
+      color: var(--text-dim);
+      margin-bottom: 60px;
+    }
+
+    .scroll-hint {
+      position: absolute;
+      bottom: 36px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      color: var(--text-dim);
+      font-size: 11px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      animation: fadeInUp 2s ease 1s both;
+    }
+
+    .scroll-hint::after {
+      content: '';
+      width: 1px;
+      height: 40px;
+      background: linear-gradient(to bottom, var(--accent), transparent);
+      animation: scrollLine 2s ease-in-out infinite;
+    }
+
+    @keyframes scrollLine {
+      0%   { transform: scaleY(0); transform-origin: top; opacity: 0; }
+      50%  { transform: scaleY(1); transform-origin: top; opacity: 1; }
+      100% { transform: scaleY(0); transform-origin: bottom; opacity: 0; }
+    }
+
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateX(-50%) translateY(16px); }
+      to   { opacity: 1; transform: translateX(-50%) translateY(0); }
+    }
+
+    /* --- Section: Nav Cards --- */
+    .section {
+      padding: 80px 0 120px;
+    }
+
+    .section-label {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      color: var(--accent);
+      letter-spacing: 4px;
+      text-transform: uppercase;
+      margin-bottom: 12px;
+    }
+
+    .section-title {
+      font-size: 28px;
+      font-weight: 700;
+      color: var(--text-bright);
+      margin-bottom: 8px;
+    }
+
+    .section-desc {
+      font-size: 14px;
+      color: var(--text-dim);
+      margin-bottom: 48px;
+      line-height: 1.7;
+    }
+
+    .cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 20px;
+    }
+
+    .card {
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 32px;
+      text-decoration: none;
+      color: inherit;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      position: relative;
+      overflow: hidden;
+      transition: border-color 0.3s, box-shadow 0.3s, transform 0.3s;
+    }
+
+    .card::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, var(--glow), transparent);
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+
+    .card:hover {
+      border-color: var(--accent);
+      box-shadow: 0 0 30px rgba(76, 124, 255, 0.1), 0 8px 32px rgba(0,0,0,0.4);
+      transform: translateY(-4px);
+    }
+
+    .card:hover::before {
+      opacity: 1;
+    }
+
+    .card-icon {
+      font-size: 28px;
+      line-height: 1;
+    }
+
+    .card-tag {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10px;
+      color: var(--accent);
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      background: rgba(76, 124, 255, 0.1);
+      border: 1px solid rgba(76, 124, 255, 0.2);
+      padding: 3px 8px;
+      border-radius: 4px;
+      width: fit-content;
+    }
+
+    .card-title {
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--text-bright);
+      line-height: 1.3;
+    }
+
+    .card-desc {
+      font-size: 13px;
+      color: var(--text-dim);
+      line-height: 1.7;
+      flex: 1;
+    }
+
+    .card-arrow {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px;
+      color: var(--accent);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-top: 8px;
+      opacity: 0;
+      transform: translateX(-8px);
+      transition: opacity 0.3s, transform 0.3s;
+    }
+
+    .card:hover .card-arrow {
+      opacity: 1;
+      transform: translateX(0);
+    }
+
+    /* --- Status badge --- */
+    .badge {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10px;
+      padding: 2px 8px;
+      border-radius: 10px;
+      display: inline-block;
+      width: fit-content;
+    }
+
+    .badge.live {
+      background: rgba(50, 200, 100, 0.12);
+      border: 1px solid rgba(50, 200, 100, 0.3);
+      color: #4ade80;
+    }
+
+    .badge.wip {
+      background: rgba(255, 180, 50, 0.1);
+      border: 1px solid rgba(255, 180, 50, 0.25);
+      color: #fbbf24;
+    }
+
+    /* --- Footer --- */
+    footer {
+      border-top: 1px solid var(--border);
+      padding: 40px 0;
+      text-align: center;
+    }
+
+    .footer-logo {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 14px;
+      color: var(--text-dim);
+      margin-bottom: 8px;
+    }
+
+    .footer-copy {
+      font-size: 12px;
+      color: #333a4d;
+    }
+
+    /* --- Responsive --- */
+    @media (max-width: 600px) {
+      .cards {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="stars"></div>
+
+  <!-- Hero -->
+  <header>
+    <div class="moon"></div>
+    <div class="logo-num">7YR</div>
+    <div class="logo-text">7년의 밤</div>
+    <div class="logo-sub">Seven Years of Night</div>
+    <div class="divider"></div>
+    <p class="hero-desc">
+      밤을 기록하는 공간.<br />
+      프로젝트, 대시보드, 그리고 7년의 흔적들.
+    </p>
+    <div class="scroll-hint">scroll</div>
+  </header>
+
+  <!-- Main content -->
+  <main>
+    <div class="wrapper">
+      <section class="section">
+        <div class="section-label">// navigate</div>
+        <h2 class="section-title">페이지 목록</h2>
+        <p class="section-desc">7년의 밤에 담긴 공간들입니다.</p>
+
+        <div class="cards">
+
+          <!-- Projects -->
+          <a href="./proj/" class="card">
+            <div class="card-tag">static</div>
+            <div class="card-icon">📁</div>
+            <div class="card-title">Proj</div>
+            <p class="card-desc">
+              정적 프로젝트 페이지 모음.<br />
+              각종 사이드 프로젝트와 실험들을 담았습니다.
+            </p>
+            <span class="badge wip">wip</span>
+            <div class="card-arrow">→ 바로가기</div>
+          </a>
+
+          <!-- 7-dashboard -->
+          <a href="./7-dashboard/" class="card">
+            <div class="card-tag">built</div>
+            <div class="card-icon">📊</div>
+            <div class="card-title">7-Dashboard</div>
+            <p class="card-desc">
+              7YR 전용 대시보드.<br />
+              빌드된 정적 페이지로 배포된 데이터 시각화 공간입니다.
+            </p>
+            <span class="badge wip">wip</span>
+            <div class="card-arrow">→ 바로가기</div>
+          </a>
+
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <footer>
+    <div class="wrapper">
+      <div class="footer-logo">7YR · 7년의 밤</div>
+      <div class="footer-copy">© 2026 7yrde · github.io</div>
+    </div>
+  </footer>
+
+</body>
+</html>

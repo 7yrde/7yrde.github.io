@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>7-Dashboard | 7년의 밤</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;700&family=JetBrains+Mono:wght@300;400&display=swap');
+
+    :root {
+      --bg: #0a0c10;
+      --bg2: #111318;
+      --bg3: #181c24;
+      --border: #1e2330;
+      --accent: #4c7cff;
+      --accent2: #7b4fff;
+      --text: #c9d1e0;
+      --text-dim: #5a6478;
+      --text-bright: #e8edf5;
+      --glow: rgba(76, 124, 255, 0.15);
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Noto Sans KR', sans-serif;
+      font-weight: 300;
+      min-height: 100vh;
+    }
+
+    .stars {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      pointer-events: none;
+    }
+    .stars::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background-image:
+        radial-gradient(1px 1px at 12% 18%, #fff 0%, transparent 100%),
+        radial-gradient(1px 1px at 28% 44%, #fff 0%, transparent 100%),
+        radial-gradient(1px 1px at 43% 9%, #fff 0%, transparent 100%),
+        radial-gradient(1px 1px at 57% 63%, #fff 0%, transparent 100%),
+        radial-gradient(1px 1px at 72% 32%, #fff 0%, transparent 100%),
+        radial-gradient(1px 1px at 87% 77%, #fff 0%, transparent 100%),
+        radial-gradient(1.5px 1.5px at 6% 53%, rgba(255,255,255,0.8) 0%, transparent 100%),
+        radial-gradient(1.5px 1.5px at 79% 14%, rgba(255,255,255,0.8) 0%, transparent 100%),
+        radial-gradient(2px 2px at 93% 58%, rgba(255,255,255,0.5) 0%, transparent 100%);
+      opacity: 0.35;
+      animation: twinkle 10s ease-in-out infinite alternate;
+    }
+    @keyframes twinkle {
+      0%   { opacity: 0.2; }
+      100% { opacity: 0.45; }
+    }
+
+    .wrapper {
+      position: relative;
+      z-index: 1;
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 0 24px;
+    }
+
+    nav {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      padding: 28px 0;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 60px;
+    }
+
+    .nav-back {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px;
+      color: var(--text-dim);
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: color 0.2s;
+    }
+    .nav-back:hover { color: var(--accent); }
+
+    .nav-sep { color: var(--border); font-size: 14px; }
+
+    .nav-current {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px;
+      color: var(--accent);
+    }
+
+    .page-header {
+      margin-bottom: 64px;
+    }
+
+    .page-label {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      color: var(--accent);
+      letter-spacing: 4px;
+      text-transform: uppercase;
+      margin-bottom: 16px;
+    }
+
+    .page-title {
+      font-size: clamp(32px, 6vw, 48px);
+      font-weight: 700;
+      color: var(--text-bright);
+      margin-bottom: 12px;
+      line-height: 1.1;
+    }
+
+    .page-desc {
+      font-size: 14px;
+      color: var(--text-dim);
+      line-height: 1.8;
+      max-width: 520px;
+    }
+
+    /* Empty state */
+    .empty-state {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 100px 24px;
+      text-align: center;
+      border: 1px dashed var(--border);
+      border-radius: 16px;
+      gap: 16px;
+    }
+
+    .empty-icon {
+      font-size: 48px;
+      opacity: 0.4;
+    }
+
+    .empty-title {
+      font-size: 16px;
+      color: var(--text-dim);
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    .empty-sub {
+      font-size: 13px;
+      color: #333a4d;
+      line-height: 1.7;
+    }
+
+    /* Info box */
+    .info-box {
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-left: 3px solid var(--accent);
+      border-radius: 8px;
+      padding: 20px 24px;
+      margin-bottom: 40px;
+      font-size: 13px;
+      color: var(--text-dim);
+      line-height: 1.8;
+    }
+
+    .info-box strong {
+      color: var(--text);
+      font-weight: 400;
+    }
+
+    .info-box code {
+      font-family: 'JetBrains Mono', monospace;
+      background: rgba(76, 124, 255, 0.08);
+      padding: 1px 6px;
+      border-radius: 4px;
+      color: var(--accent);
+      font-size: 12px;
+    }
+
+    footer {
+      border-top: 1px solid var(--border);
+      padding: 36px 0;
+      text-align: center;
+      margin-top: 80px;
+    }
+
+    .footer-logo {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px;
+      color: var(--text-dim);
+    }
+  </style>
+</head>
+<body>
+
+  <div class="stars"></div>
+
+  <div class="wrapper">
+    <nav>
+      <a href="../" class="nav-back">← 7년의 밤</a>
+      <span class="nav-sep">/</span>
+      <span class="nav-current">7-dashboard</span>
+    </nav>
+
+    <div class="page-header">
+      <div class="page-label">// dashboard</div>
+      <h1 class="page-title">7-Dashboard</h1>
+      <p class="page-desc">
+        7YR 전용 대시보드 정적 빌드 페이지입니다.<br />
+        빌드된 파일을 이 디렉토리에 배포하면 바로 확인할 수 있습니다.
+      </p>
+    </div>
+
+    <div class="info-box">
+      <strong>배포 방법</strong><br />
+      <code>7-dashboard</code> 프로젝트를 빌드한 후, 빌드 결과물(<code>dist/</code> 또는 <code>build/</code>)을
+      이 <code>7-dashboard/</code> 디렉토리에 복사하거나 교체해주세요.<br />
+      GitHub Pages에서 자동으로 서빙됩니다.
+    </div>
+
+    <!-- 빌드 파일 배포 전 빈 상태 -->
+    <div class="empty-state">
+      <div class="empty-icon">📊</div>
+      <div class="empty-title">// build not deployed</div>
+      <div class="empty-sub">
+        아직 대시보드 빌드가 배포되지 않았습니다.<br />
+        빌드 결과물을 <code style="font-family: JetBrains Mono, monospace; color: #3a4a6a;">7-dashboard/</code> 디렉토리에 넣어주세요.
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    <div class="wrapper">
+      <div class="footer-logo">7YR · 7년의 밤 · 7-dashboard</div>
+    </div>
+  </footer>
+
+</body>
+</html>
