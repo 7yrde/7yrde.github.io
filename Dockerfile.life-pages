@@ -1,0 +1,5 @@
+FROM nginx:alpine
+COPY hlth/ /usr/share/nginx/html/hlth/
+COPY lngg/ /usr/share/nginx/html/lngg/
+COPY nvst/ /usr/share/nginx/html/nvst/
+COPY auth.js /usr/share/nginx/html/auth.js
